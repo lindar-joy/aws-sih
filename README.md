@@ -68,8 +68,8 @@ chmod +x run-unit-tests.sh && ./run-unit-tests.sh
 ```bash
 cd $MAIN_DIRECTORY/source/constructs
 npm run clean:install
-overrideWarningsEnabled=false npx cdk bootstrap --profile <PROFILE_NAME>
-overrideWarningsEnabled=false npx cdk deploy\
+overrideWarningsEnabled=false npm run cdk -- bootstrap --profile <PROFILE_NAME>
+overrideWarningsEnabled=false npm run cdk -- deploy\
  --parameters DeployDemoUIParameter=Yes\
   --parameters SourceBucketsParameter=<MY_BUCKET>\
    --profile <PROFILE_NAME>
