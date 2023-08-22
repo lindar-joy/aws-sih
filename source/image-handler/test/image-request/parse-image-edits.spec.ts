@@ -25,7 +25,10 @@ describe("parseImageEdits", () => {
   it("Should pass if the proper result is returned for a sample base64-encoded image request", () => {
     // Arrange
     const event = {
-      path: "/eyJlZGl0cyI6eyJncmF5c2NhbGUiOiJ0cnVlIiwicm90YXRlIjo5MCwiZmxpcCI6InRydWUifX0=",
+      path: "/",
+      queryStringParameters: {
+        edits: JSON.stringify({ grayscale: "true", rotate: 90, flip: "true" })
+      }
     };
 
     // Act

@@ -52,7 +52,6 @@ describe("parseRequestType", () => {
     const result = imageRequest.parseRequestType(event);
 
     // Assert
-    expect(consoleInfoSpy).toHaveBeenCalledWith("Path is not base64 encoded.");
     expect(result).toEqual(RequestTypes.THUMBOR);
   });
 
@@ -68,7 +67,7 @@ describe("parseRequestType", () => {
     const results = events.map((event) => imageRequest.parseRequestType(event));
 
     // Assert
-    expect(results).toEqual(new Array(events.length).fill(RequestTypes.THUMBOR));
+    expect(results).toEqual(new Array(events.length).fill(RequestTypes.DEFAULT));
   });
 
   it("Should pass if the method detects a custom request", () => {
@@ -119,7 +118,7 @@ describe("parseRequestType", () => {
     const result = imageRequest.parseRequestType(event);
 
     // Assert
-    const expectedResult = RequestTypes.THUMBOR;
+    const expectedResult = RequestTypes.DEFAULT;
     expect(result).toEqual(expectedResult);
   });
 });

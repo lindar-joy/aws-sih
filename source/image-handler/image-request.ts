@@ -15,6 +15,8 @@ import {
   ImageRequestInfo,
   RequestTypes,
   StatusCodes,
+  parseS3Url,
+  s3UrlPattern,
 } from "./lib";
 import { SecretProvider } from "./secret-provider";
 import { ThumborMapper } from "./thumbor-mapper";
@@ -30,7 +32,10 @@ type OriginalImageInfo = Partial<{
 export class ImageRequest {
   private static readonly DEFAULT_EFFORT = 4;
 
-  constructor(private readonly s3Client: S3, private readonly secretProvider: SecretProvider) { }
+  constructor(
+    private readonly s3Client: S3,
+    private readonly secretProvider: SecretProvider
+  ) {}
 
   /**
    * Determines the output format of an image
@@ -126,7 +131,7 @@ export class ImageRequest {
        */
       if (
         imageRequestInfo.contentType !== ContentTypes.SVG ||
-        imageRequestInfo.edits.toFormat ||
+        imageRequestInfo.edits?.toFormat ||
         imageRequestInfo.outputFormat
       ) {
         this.determineOutputFormat(imageRequestInfo, event);
@@ -318,8 +323,7 @@ export class ImageRequest {
    */
   public parseRequestType(event: ImageHandlerEvent): RequestTypes {
     const { path } = event;
-    const matchDefault = /^(\/?)([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
-    const matchThumbor1 = /^(\/?)((fit-in)?|(filters:.+\(.?\))?|(unsafe)?)/i;
+    const matchThumbor1 = /^(\/?)(?<commands>fit-in|filters:.+\(.*\)|unsafe)/i;
     const matchThumbor2 = /((.(?!(\.[^.\\/]+$)))*$)/i;
     const matchThumbor3 = /.*(\.jpg$|\.jpeg$|.\.png$|\.webp$|\.tiff$|\.tif$|\.svg$|\.gif$)/i;
     const { REWRITE_MATCH_PATTERN, REWRITE_SUBSTITUTION } = process.env;
@@ -329,24 +333,15 @@ export class ImageRequest {
       REWRITE_MATCH_PATTERN !== undefined &&
       REWRITE_SUBSTITUTION !== undefined;
 
-    // Check if path is base 64 encoded
-    let isBase64Encoded = true;
-    try {
-      this.decodeRequest(event);
-    } catch (error) {
-      console.info("Path is not base64 encoded.");
-      isBase64Encoded = false;
-    }
-
-    if (matchDefault.test(path) && isBase64Encoded) {
+    if (path.match(matchThumbor1)?.groups?.commands && (matchThumbor2.test(path) || matchThumbor3.test(path))) {
       // use sharp
-      return RequestTypes.DEFAULT;
+      return RequestTypes.THUMBOR;
     } else if (definedEnvironmentVariables) {
       // use rewrite function then thumbor mappings
       return RequestTypes.CUSTOM;
-    } else if (matchThumbor1.test(path) && (matchThumbor2.test(path) || matchThumbor3.test(path))) {
+    } else if (s3UrlPattern.test(path)) {
       // use thumbor mappings
-      return RequestTypes.THUMBOR;
+      return RequestTypes.DEFAULT;
     } else {
       throw new ImageHandlerError(
         StatusCodes.BAD_REQUEST,
@@ -379,21 +374,35 @@ export class ImageRequest {
    * @returns The decoded from base-64 image request.
    */
   public decodeRequest(event: ImageHandlerEvent): DefaultImageRequest {
-    const { path } = event;
+    const { path, queryStringParameters } = event;
 
     if (path) {
-      const encoded = path.startsWith("/") ? path.slice(1) : path;
-      const toBuffer = Buffer.from(encoded, "base64");
-      try {
-        // To support European characters, 'ascii' was removed.
-        return JSON.parse(toBuffer.toString());
-      } catch (error) {
-        throw new ImageHandlerError(
-          StatusCodes.BAD_REQUEST,
-          "DecodeRequest::CannotDecodeRequest",
-          "The image request you provided could not be decoded. Please check that your request is base64 encoded properly and refer to the documentation for additional guidance."
-        );
+      const url = path.startsWith("/") ? path.slice(1) : path;
+      const { bucket, key } = parseS3Url(url) || {};
+
+      const result: DefaultImageRequest = {
+        bucket,
+        key,
+      };
+
+      if (queryStringParameters) {
+        Object.entries(queryStringParameters).forEach(([key, value]) => {
+          if (["edits", "headers"].includes(key)) {
+            try {
+              result[key] = JSON.parse(value);
+            } catch (error) {
+              throw new ImageHandlerError(
+                StatusCodes.BAD_REQUEST,
+                "DecodeRequest::CannotDecodeRequest",
+                "The image request you provided could not be decoded. Please check that your request is json stringified properly and refer to the documentation for additional guidance."
+              );
+            }
+          } else {
+            result[key] = value;
+          }
+        });
       }
+      return result;
     } else {
       throw new ImageHandlerError(
         StatusCodes.BAD_REQUEST,

@@ -25,7 +25,7 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the default request format", () => {
     // Arrange
     const event = {
-      path: "/eyJidWNrZXQiOiJteS1zYW1wbGUtYnVja2V0Iiwia2V5Ijoic2FtcGxlLWltYWdlLTAwMS5qcGcifQ==",
+      path: "/https://s3-eu-west-1.amazonaws.com/my-sample-bucket/sample-image-001.jpg",
     };
 
     // Act
@@ -39,7 +39,17 @@ describe("parseImageKey", () => {
 
   it("should read image requests with base64 encoding having slash", () => {
     const event = {
-      path: "/eyJidWNrZXQiOiJlbGFzdGljYmVhbnN0YWxrLXVzLWVhc3QtMi0wNjY3ODQ4ODU1MTgiLCJrZXkiOiJlbnYtcHJvZC9nY2MvbGFuZGluZ3BhZ2UvMV81N19TbGltTl9MaWZ0LUNvcnNldC1Gb3ItTWVuLVNOQVAvYXR0YWNobWVudHMvZmZjMWYxNjAtYmQzOC00MWU4LThiYWQtZTNhMTljYzYxZGQzX1/Ys9mE2YrZhSDZhNmK2YHYqiAoMikuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjo0ODAsImZpdCI6ImNvdmVyIn19fQ==",
+      path: `https://s3-eu-west-1.amazonaws.com/elasticbeanstalk-us-east-2-066784885518/${
+        JSON.parse(
+          Buffer.from(
+            "eyJidWNrZXQiOiJlbGFzdGljYmVhbnN0YWxrLXVzLWVhc3QtMi0wNjY3ODQ4ODU1MTgiLCJrZXkiOiJlbnYtcHJvZC9nY2MvbGFuZGluZ3BhZ2UvMV81N19TbGltTl9MaWZ0LUNvcnNldC1Gb3ItTWVuLVNOQVAvYXR0YWNobWVudHMvZmZjMWYxNjAtYmQzOC00MWU4LThiYWQtZTNhMTljYzYxZGQzX1/Ys9mE2YrZhSDZhNmK2YHYqiAoMikuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjo0ODAsImZpdCI6ImNvdmVyIn19fQ==",
+            "base64"
+          ).toString()
+        ).key
+      }`,
+      queryStringParameters: {
+        edits: JSON.stringify({ resize: { width: 480, fit: "cover" } }),
+      },
     };
 
     // Act

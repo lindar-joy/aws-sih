@@ -1150,7 +1150,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "cbce79c1a059e42316defff98ccccca3892126260c8c300ead2b3c33c6549a87.zip",
+          "S3Key": "5fce4d56b220ed8ffc307874bae72e2924596db3c4fafd0b1efc0a9ecc7d5440.zip",
         },
         "Description": "sih (v6.2.1): Performs image edits and manipulations",
         "Environment": {
@@ -1286,7 +1286,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
     "CommonResourcesCustomResourcesCustomResourceAnonymousMetric51363F57": {
       "DeletionPolicy": "Delete",
       "Properties": {
-        "AnonymousData": "Yes",
+        "AnonymousData": "No",
         "AutoWebP": {
           "Ref": "AutoWebPParameter",
         },
