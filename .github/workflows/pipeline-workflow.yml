@@ -38,16 +38,17 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm' # Cache dependencies
       - name: Run tests
-        run: cd deployment/ && chmod +x run-unit-tests.sh && ./run-unit-tests.sh
+        working-directory: ./deployment
+        run: chmod +x run-unit-tests.sh && ./run-unit-tests.sh
       - name: Install dependencies
-        run: cd ../source/constructs && npm run clean:install
-      - name: Bootstrap
-        run: overrideWarningsEnabled=false npm run cdk -- bootstrap
+        working-directory: ./source/constructs
+        run: npm run clean:install
       - name: Deploy without domain
-        if: !${{ secrets.CUSTOM_DOMAIN }}
+        working-directory: ./source/constructs
+        if: ${{ env.CUSTOM_DOMAIN == '' }}
         run: overrideWarningsEnabled=false npm run cdk -- deploy --parameters DeployDemoUIParameter=$DEMO_UI --parameters SourceBucketsParameter=$SOURCE_BUCKETS
       - name: Deploy with custom domain
-        if: ${{ secrets.CUSTOM_DOMAIN }}
+        working-directory: ./source/constructs
+        if: ${{ env.CUSTOM_DOMAIN != '' }}
         run: overrideWarningsEnabled=false npm run cdk -- deploy --parameters DeployDemoUIParameter=$DEMO_UI --parameters CustomDomainParameter=$CUSTOM_DOMAIN --parameters SourceBucketsParameter=$SOURCE_BUCKETS

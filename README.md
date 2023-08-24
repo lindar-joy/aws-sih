@@ -86,8 +86,9 @@ _Note:_
 #### Automated deployments
 For automated deployments with GitHub actions, see `.github/workflows/pipeline-workflow.yml`.
 
-1. Change `if: github.repository_owner == 'GeKorm'` to your user or organization name
-2. Add the following variables and secrets:
+1. Bootstrap locally if not already done
+2. Change `if: github.repository_owner == 'GeKorm'` to your user or organization name
+3. Add the following variables and secrets:
    - Secret **DISPATCHER_ROLE_ARN** 
    - Secret **SOURCE_BUCKETS** (for `SourceBucketsParameter`)
    - Variable **DEMO_UI** (for `DeployDemoUIParameter`)
