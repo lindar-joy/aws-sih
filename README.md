@@ -1,50 +1,38 @@
-**[Serverless Image Handler](https://aws.amazon.com/solutions/implementations/serverless-image-handler/)** | **[🚧 Feature request](https://github.com/aws-solutions/serverless-image-handler/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=)** | **[🐛 Bug Report](https://github.com/aws-solutions/serverless-image-handler/issues/new?assignees=&labels=bug&template=bug_report.md&title=)** | **[❓ General Question](https://github.com/aws-solutions/serverless-image-handler/issues/new?assignees=&labels=question&template=general_question.md&title=)**
+**Fork of [Serverless Image Handler](https://aws.amazon.com/solutions/implementations/serverless-image-handler/)**
 
-**Note**: If you want to use the solution without building from source, navigate to [Solution Landing Page](https://aws.amazon.com/solutions/implementations/serverless-image-handler/).
+## Table of Contents
 
-## Table of Content
+* [Changes in this fork](#changes-in-this-fork)
+  * [Deploying or Customizing the Solution](#deploying-or-customizing-the-solution)
+    * [Prerequisites](#prerequisites)
+    * [1. Clone the repository](#1-clone-the-repository)
+    * [2. Unit Test](#2-unit-test)
+    * [3. Build and Deploy](#3-build-and-deploy)
+      * [Default generated cloudfront domain](#default-generated-cloudfront-domain)
+      * [Custom domains](#custom-domains)
+      * [Automated deployments](#automated-deployments)
+  * [Usage](#usage)
+    * [Basic example](#basic-example)
+      * [Other examples](#other-examples)
+    * [Query parameters](#query-parameters)
+    * [Thumbor and Rewrites](#thumbor-and-rewrites)
+  * [License](#license)
 
-- [Solution Overview](#solution-overview)
-- [Architecture Diagram](#architecture-diagram)
-- [AWS CDK and Solutions Constructs](#aws-cdk-and-solutions-constructs)
-- [Customizing the Solution](#customizing-the-solution)
-  - [Prerequisites for Customization](#prerequisites-for-customization)
-    - [1. Clone the repository](#1-clone-the-repository)
-    - [2. Unit Test](#2-unit-test)
-    - [3. Build & Deploy](#3-build-and-deploy)
-- [Collection of operational metrics](#collection-of-operational-metrics)
-- [External Contributors](#external-contributors)
-- [License](#license)
+# Changes in this fork
 
-# Solution Overview
+- **New URL scheme**. Edit with Sharp using search (query) parameters for better SEO. See [Usage](#usage)
+- **Custom domain**. A certificate and hosted zone is automatically generated for your domain
+- Disabled data collection
+- Upgraded dependencies
+- Scripts are only run from local dependencies (uses `npm run` instead of `npx`) for greater reliability
 
-The Serverless Image Handler solution helps to embed images on websites and mobile applications to drive user engagement. It uses [Sharp](https://sharp.pixelplumbing.com/en/stable/) to provide high-speed image processing without sacrificing image quality. To minimize costs of image optimization, manipulation, and processing, this solution automates version control and provides flexible storage and compute options for file reprocessing.
 
-This solution automatically deploys and configures a serverless architecture optimized for dynamic image manipulation. Images can be rendered and returned spontaneously. For example, an image can be resized based on different screen sizes by adding code on a website that leverages this solution to resize the image before being sent to the screen using the image. It uses [Amazon CloudFront](https://aws.amazon.com/cloudfront) for global content delivery and [Amazon Simple Storage Service](https://aws.amazon.com/s3) (Amazon S3) for reliable and durable cloud storage.
+## Deploying or Customizing the Solution
 
-For more information and a detailed deployment guide, visit the [Serverless Image Handler](https://aws.amazon.com/solutions/implementations/serverless-image-handler/) solution page.
-
-# Architecture Diagram
-
-![Architecture Diagram](./architecture.png)
-
-The AWS CloudFormation template deploys an Amazon CloudFront distribution, Amazon API Gateway REST API, and an AWS Lambda function. Amazon CloudFront provides a caching layer to reduce the cost of image processing and the latency of subsequent image delivery. The Amazon API Gateway provides endpoint resources and triggers the AWS Lambda function. The AWS Lambda function retrieves the image from the customer's Amazon Simple Storage Service (Amazon S3) bucket and uses Sharp to return a modified version of the image to the API Gateway. Additionally, the solution generates a CloudFront domain name that provides cached access to the image handler API.
-
-# AWS CDK and Solutions Constructs
-
-[AWS Cloud Development Kit (AWS CDK)](https://aws.amazon.com/cdk/) and [AWS Solutions Constructs](https://aws.amazon.com/solutions/constructs/) make it easier to consistently create well-architected infrastructure applications. All AWS Solutions Constructs are reviewed by AWS and use best practices established by the AWS Well-Architected Framework. This solution uses the following AWS Solutions Constructs:
-
-- [aws-cloudfront-s3](https://docs.aws.amazon.com/solutions/latest/constructs/aws-cloudfront-s3.html)
-- [aws-cloudfront-apigateway-lambda](https://docs.aws.amazon.com/solutions/latest/constructs/aws-cloudfront-apigateway-lambda.html)
-
-In addition to the AWS Solutions Constructs, the solution uses AWS CDK directly to create infrastructure resources.
-
-# Customizing the Solution
-
-## Prerequisites for Customization
+### Prerequisites
 
 - [AWS Command Line Interface](https://aws.amazon.com/cli/)
-- Node.js 16.x or later
+- Node.js 18.x or later
 
 ### 1. Clone the repository
 
@@ -53,7 +41,6 @@ git clone https://github.com/aws-solutions/serverless-image-handler.git
 cd serverless-image-handler
 export MAIN_DIRECTORY=$PWD
 ```
-
 
 ### 2. Unit Test
 
@@ -65,6 +52,8 @@ chmod +x run-unit-tests.sh && ./run-unit-tests.sh
 ```
 
 ### 3. Build and Deploy
+
+#### Default generated cloudfront domain
 ```bash
 cd $MAIN_DIRECTORY/source/constructs
 npm run clean:install
@@ -75,35 +64,94 @@ overrideWarningsEnabled=false npm run cdk -- deploy\
    --profile <PROFILE_NAME>
 ```
 
+#### Custom domains
+```bash
+cd $MAIN_DIRECTORY/source/constructs
+npm run clean:install
+overrideWarningsEnabled=false npm run cdk -- bootstrap --profile <PROFILE_NAME>
+overrideWarningsEnabled=false npm run cdk -- deploy\
+ --parameters DeployDemoUIParameter=Yes\
+  --parameters SourceBucketsParameter=<MY_BUCKET>\
+   --parameters CustomDomainParameter=<MY_DOMAIN>\
+    --profile <PROFILE_NAME>
+```
+
+The first deployment with a custom domain requires verifying ownership, if not already verified. Until verified, the **deployment will seem stuck** at the `Certificate create_in_progress` step. Please see https://docs.aws.amazon.com/acm/latest/userguide/domain-ownership-validation.html for instructions. The solution will have created a Hosted zone for you custom domain, which you can view in the AWS Route 53 dashboard.
+
 _Note:_
 - **MY_BUCKET**: name of an existing bucket in your account
 - **PROFILE_NAME**: name of an AWS CLI profile that has appropriate credentials for deploying in your preferred region
+- **MY_DOMAIN**: full domain to use as a Cloudfront alias, eg `--parameters CustomDomain=x.example.com`
 
-# Collection of operational metrics
+#### Automated deployments
+For automated deployments with GitHub actions, see `.github/workflows/pipeline-workflow.yml`.
 
-This solution collects anonymous operational metrics to help AWS improve the quality and features of the solution. For more information, including how to disable this capability, please see the [implementation guide](https://docs.aws.amazon.com/solutions/latest/serverless-image-handler/op-metrics.html).
+1. Change `if: github.repository_owner == 'GeKorm'` to your user or organization name
+2. Add the following variables and secrets:
+   - Secret **DISPATCHER_ROLE_ARN** 
+   - Secret **SOURCE_BUCKETS** (for `SourceBucketsParameter`)
+   - Variable **DEMO_UI** (for `DeployDemoUIParameter`)
+   - _[Optional]_ Secret **CUSTOM_DOMAIN** (for `CustomDomainParameter`)
 
-# External Contributors
+## Usage
 
-- [@leviwilson](https://github.com/leviwilson) for [#117](https://github.com/aws-solutions/serverless-image-handler/pull/117)
-- [@rpong](https://github.com/rpong) for [#130](https://github.com/aws-solutions/serverless-image-handler/pull/130)
-- [@harriswong](https://github.com/harriswong) for [#138](https://github.com/aws-solutions/serverless-image-handler/pull/138)
-- [@ganey](https://github.com/ganey) for [#139](https://github.com/aws-solutions/serverless-image-handler/pull/139)
-- [@browniebroke](https://github.com/browniebroke) for [#151](https://github.com/aws-solutions/serverless-image-handler/pull/151), [#152](https://github.com/aws-solutions/serverless-image-handler/pull/152)
-- [@john-shaffer](https://github.com/john-shaffer) for [#158](https://github.com/aws-solutions/serverless-image-handler/pull/158)
-- [@toredash](https://github.com/toredash) for [#174](https://github.com/aws-solutions/serverless-image-handler/pull/174), [#195](https://github.com/aws-solutions/serverless-image-handler/pull/195)
-- [@lith-imad](https://github.com/lith-imad) for [#194](https://github.com/aws-solutions/serverless-image-handler/pull/194)
-- [@pch](https://github.com/pch) for [#227](https://github.com/aws-solutions/serverless-image-handler/pull/227)
-- [@atrope](https://github.com/atrope) for [#201](https://github.com/aws-solutions/serverless-image-handler/pull/201), [#202](https://github.com/aws-solutions/serverless-image-handler/pull/202)
-- [@bretto36](https://github.com/bretto36) for [#182](https://github.com/aws-solutions/serverless-image-handler/pull/182)
-- [@makoncline](https://github.com/makoncline) for [#255](https://github.com/aws-solutions/serverless-image-handler/pull/255)
-- [@frankenbubble](https://github.com/frankenbubble) for [#302](https://github.com/aws-solutions/serverless-image-handler/pull/302)
-- [@guidev](https://github.com/guidev) for [#309](https://github.com/aws-solutions/serverless-image-handler/pull/309)
-- [@njtmead](https://github.com/njtmead) for [#276](https://github.com/aws-solutions/serverless-image-handler/pull/276)
-- [@StaymanHou](https://github.com/StaymanHou) for [#320](https://github.com/aws-solutions/serverless-image-handler/pull/320)
-- [@alenpaulvarghese](https://github.com/alenpaulvarghese) for [#392](https://github.com/aws-solutions/serverless-image-handler/pull/392)
+The new URL scheme is `https://<domain>/<s3-url-or-path-to-image>?edits=<edits>`. The bucket and key are part of the URL unencoded. All other parameters like moved to the query string portion of the URL.
 
-# License
+### Basic example
+
+```typescript
+// How to use edits https://docs.aws.amazon.com/solutions/latest/serverless-image-handler/create-and-use-image-requests.html#dynamically-resize-photos
+const edits = {};
+
+// Stringify and encode URI
+// For s3 bucket "bucket" and image key "/folder/image.jpg":
+const url = `https://example.cloudfront.net/bucket/folder/image.jpg?edits=${encodeURIComponent(JSON.stringify(edits))}`
+```
+
+#### Other examples
+The image's full S3 URL can be used. This is a non-exhaustive list of accepted formats
+
+- https://example.cloudfront.net/bucket/folder/image.jpg?edits=
+- https://example.cloudfront.net/s3.us-east-1.amazonaws.com/bucket/test.jpg?edits=
+- https://example.cloudfront.net/https://s3.amazonaws.com/bucket/test?edits= (extension is optional)
+- https://example.cloudfront.net/s3.amazonaws.com/bucket/test.jpg?edits=
+- https://example.cloudfront.net/https://s3-us-east-1.amazonaws.com/source-bucket/test.jpg?edits=
+
+Please open an issue if your preferred S3 URL format isn't supported.
+
+### Query parameters
+
+| Key            | Value                                         |
+|----------------|-----------------------------------------------|
+| `signature`    | `string`                                      |
+| `effort`       | `string`                                      |
+| `outputFormat` | `string`                                      |
+| `edits`        | `encodeURIComponent(JSON.stringify(edits))`   |
+| `headers`      | `encodeURIComponent(JSON.stringify(headers))` |
+
+As an alternative to `encodeURIComponent` you can use `URL` or `URLSearchParams`
+
+```typescript
+const url = new URL("https://cdn.example.com/bucket/image.jpg")
+url.searchParams.set('outputFormat', 'webp');
+url.searchParams.set('edits', JSON.stringify(edits));
+
+console.log(url.toString()) 
+// https://cdn.example.com/bucket/image.jpg?outputFormat=webp&edits=%7B%22
+
+// or equivalent
+const params = new URLSearchParams();
+params.set('outputFormat', 'webp');
+params.set('edits', JSON.stringify(edits));
+
+console.log('https://cdn.example.com/bucket/image.jpg?' + params.toString()) 
+// https://cdn.example.com/bucket/image.jpg?outputFormat=webp&edits=%7B%22
+```
+
+### Thumbor and Rewrites
+Thumbor and the Rewrite feature may work, but are not supported. Please use the [original solution](https://github.com/aws-solutions/serverless-image-handler) if required.
+
+## License
 
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.   
 SPDX-License-Identifier: Apache-2.0
