@@ -1265,7 +1265,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "fd5ddf7e2e2103c8a05d4470cd05284f5727665c8cd3303b5f75134fc2162a9b.zip",
+          "S3Key": "3312e4d7a059d31a6bdd89478f9d8e6bcc4edabad92c042489433cb1a4528d98.zip",
         },
         "Description": "sih (v6.2.1): Performs image edits and manipulations",
         "Environment": {
@@ -1313,7 +1313,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs16.x",
+        "Runtime": "nodejs18.x",
         "Tags": [
           {
             "Key": "SolutionId",
@@ -1595,7 +1595,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "1d9c0f7ba21ae4df4d9f33af092ffe6bf4c806ea06398e947419c4e7f091d52b.zip",
+          "S3Key": "0245c422cd64ff4efe46942d3a1bedd06567c977cda396e92e21b6dc363c1939.zip",
         },
         "Description": "sih (v6.2.1): Custom resource",
         "Environment": {
@@ -1614,7 +1614,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs16.x",
+        "Runtime": "nodejs18.x",
         "Tags": [
           {
             "Key": "SolutionId",
@@ -1759,7 +1759,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "f8e422c63159c82c409e8254300a3134e020892c27382902d4c8c0a5b35d0a06.zip",
+          "S3Key": "e2277687077a2abf9ae1af1cc9565e6715e2ebb62f79ec53aa75a1af9298f642.zip",
         },
         "Description": "/opt/awscli/aws",
       },

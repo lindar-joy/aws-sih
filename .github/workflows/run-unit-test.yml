@@ -2,7 +2,7 @@
 name: Unit Test
 
 on:
-  push: 
+  push:
     branches:
       - '*'
   pull_request:
@@ -11,7 +11,7 @@ on:
 jobs:
   unittest:
     name: Unit Test Check
-    if: ${{ (github.repository_owner != 'aws-solutions' && github.event_name == 'push') || (github.repository_owner == 'aws-solutions' && github.event_name == 'pull_request') }}
+    if: ${{ (github.repository_owner != 'GeKorm' && github.event_name == 'push') || (github.repository_owner == 'GeKorm' && github.event_name == 'pull_request') }}
     runs-on: ubuntu-latest
     strategy:
       matrix:

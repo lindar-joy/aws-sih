@@ -9,7 +9,8 @@ interface S3Object {
 
 type ParseS3Url = (url: string) => S3Object | Record<string, string> | undefined;
 
-export const s3UrlPattern = new RegExp(/^(?:(?:https:\/\/)?s3[.-](?:(?<region>[^.]+).)?amazonaws\.com\/)?(?:(?<bucket>[^/]+)\/?\/)?(?<key>.*?)$/);
+export const s3UrlPattern = new RegExp(
+  /^(?:(?:https:\/\/)?s3[.-](?:(?<region>[^.]+).)?amazonaws\.com\/)?(?:(?<bucket>[^/]+)\/?\/)?(?<key>.*?)$/
+);
 
-export const parseS3Url: ParseS3Url = (url) =>
-  url.match(s3UrlPattern)?.groups;
+export const parseS3Url: ParseS3Url = (url) => url.match(s3UrlPattern)?.groups;

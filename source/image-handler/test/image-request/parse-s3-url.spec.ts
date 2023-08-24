@@ -49,7 +49,7 @@ describe("parseS3Url", () => {
     expect(key).toBe('test.jpg');
   });
 
-  it("Should extract bucket and key from S3 URL without bucket", () => {
+  it("Should extract key from S3 URL without bucket", () => {
     const url = "https://s3-eu-west-1.amazonaws.com/test.jpg";
     const { bucket, key, region } = parseS3Url(url);
     expect(region).toBeUndefined;
@@ -57,7 +57,7 @@ describe("parseS3Url", () => {
     expect(key).toBe('test.jpg');
   });
 
-  it("Should extract bucket and key from S3 URL without bucket or region", () => {
+  it("Should extract key from S3 URL without bucket or region", () => {
     const url = "s3.amazonaws.com/test.jpg";
     const { bucket, key, region } = parseS3Url(url);
     expect(region).toBeUndefined;
