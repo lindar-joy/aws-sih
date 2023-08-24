@@ -8,6 +8,7 @@ import {
   CacheHeaderBehavior,
   CachePolicy,
   CacheQueryStringBehavior,
+  CfnDistribution,
   DistributionProps,
   IOrigin,
   OriginRequestPolicy,
@@ -15,18 +16,31 @@ import {
   PriceClass,
   ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
+import { ARecord, HostedZone, RecordTarget, CfnRecordSet } from "aws-cdk-lib/aws-route53";
+import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import { HttpOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { Policy, PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
 import { IBucket } from "aws-cdk-lib/aws-s3";
+import { Certificate, CfnCertificate } from "aws-cdk-lib/aws-certificatemanager";
 import { ArnFormat, Aws, Duration, Lazy, Stack } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { CloudFrontToApiGatewayToLambda } from "@aws-solutions-constructs/aws-cloudfront-apigateway-lambda";
 
 import { addCfnSuppressRules } from "../../utils/utils";
+import { QueryStringParameters } from "../../../image-handler/lib";
 import { SolutionConstructProps } from "../types";
+import { Conditions } from "../common-resources/common-resources-construct";
+
+const queryStringParameters: (keyof QueryStringParameters)[] = [
+  "signature",
+  "edits",
+  "headers",
+  "effort",
+  "outputFormat",
+];
 
 export interface BackEndProps extends SolutionConstructProps {
   readonly solutionVersion: string;
@@ -35,6 +49,10 @@ export interface BackEndProps extends SolutionConstructProps {
   readonly logsBucket: IBucket;
   readonly uuid: string;
   readonly cloudFrontPriceClass: string;
+  readonly certificate?: Certificate;
+  readonly hostedZone?: HostedZone;
+  readonly customDomain: string;
+  readonly conditions: Conditions;
 }
 
 export class BackEnd extends Construct {
@@ -142,13 +160,13 @@ export class BackEnd extends Construct {
       maxTtl: Duration.days(365),
       enableAcceptEncodingGzip: true,
       headerBehavior: CacheHeaderBehavior.allowList("origin", "accept"),
-      queryStringBehavior: CacheQueryStringBehavior.allowList("signature"),
+      queryStringBehavior: CacheQueryStringBehavior.allowList(...queryStringParameters),
     });
 
     const originRequestPolicy = new OriginRequestPolicy(this, "OriginRequestPolicy", {
       originRequestPolicyName: `ServerlessImageHandler-${props.uuid}`,
       headerBehavior: CacheHeaderBehavior.allowList("origin", "accept"),
-      queryStringBehavior: CacheQueryStringBehavior.allowList("signature"),
+      queryStringBehavior: CacheQueryStringBehavior.allowList(...queryStringParameters),
     });
 
     const apiGatewayRestApi = RestApi.fromRestApiId(
@@ -173,6 +191,8 @@ export class BackEnd extends Construct {
         originRequestPolicy,
         cachePolicy,
       },
+      domainNames: [props.customDomain],
+      certificate: props.certificate,
       priceClass: props.cloudFrontPriceClass as PriceClass,
       enableLogging: true,
       logBucket: props.logsBucket,
@@ -211,7 +231,37 @@ export class BackEnd extends Construct {
     );
 
     imageHandlerCloudFrontApiGatewayLambda.apiGateway.node.tryRemoveChild("Endpoint"); // we don't need the RestApi endpoint in the outputs
+    (
+      imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.node.defaultChild as CfnDistribution
+    ).addPropertyOverride("DistributionConfig.ViewerCertificate", {
+      "Fn::If": [
+        props.conditions.customDomainCondition.logicalId,
+        {
+          AcmCertificateArn: (props.certificate?.node.defaultChild as CfnCertificate).ref,
+          MinimumProtocolVersion: "TLSv1.2_2021",
+          SslSupportMethod: "sni-only",
+        },
+        Aws.NO_VALUE,
+      ],
+    });
+
+    (
+      imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.node.defaultChild as CfnDistribution
+    ).addPropertyOverride("DistributionConfig.Aliases", {
+      "Fn::If": [props.conditions.customDomainCondition.logicalId, [props.customDomain], Aws.NO_VALUE],
+    });
 
     this.domainName = imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.distributionDomainName;
+
+    const aRecord = new ARecord(this, "ARecord", {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      zone: props.hostedZone!,
+      target: RecordTarget.fromAlias(
+        new CloudFrontTarget(imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution)
+      ),
+      recordName: props.customDomain,
+    });
+
+    (aRecord.node.defaultChild as CfnRecordSet).cfnOptions.condition = props.conditions.customDomainCondition;
   }
 }

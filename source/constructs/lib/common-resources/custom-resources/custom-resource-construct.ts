@@ -153,6 +153,7 @@ export class CustomResourcesConstruct extends Construct {
       DeployDemoUi: props.deployUI,
       LogRetentionPeriod: props.logRetentionPeriod,
       AutoWebP: props.autoWebP,
+      CustomDomain: props.customDomain,
       EnableSignature: props.enableSignature,
       EnableDefaultFallbackImage: props.enableDefaultFallbackImage,
     });

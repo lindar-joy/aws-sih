@@ -108,6 +108,8 @@ export class ImageRequest {
       imageRequestInfo.bucket = this.parseImageBucket(event, imageRequestInfo.requestType);
       imageRequestInfo.key = this.parseImageKey(event, imageRequestInfo.requestType);
       imageRequestInfo.edits = this.parseImageEdits(event, imageRequestInfo.requestType);
+      console.log("setup imageRequestInfo.edits");
+      console.log(imageRequestInfo.edits);
 
       const originalImage = await this.getOriginalImage(imageRequestInfo.bucket, imageRequestInfo.key);
       imageRequestInfo = { ...imageRequestInfo, ...originalImage };
@@ -245,6 +247,8 @@ export class ImageRequest {
    * @returns The edits to be made to the original image.
    */
   public parseImageEdits(event: ImageHandlerEvent, requestType: RequestTypes): ImageEdits {
+    console.log("parseImageEdits requestType");
+    console.log(requestType);
     if (requestType === RequestTypes.DEFAULT) {
       const decoded = this.decodeRequest(event);
       return decoded.edits;
@@ -386,10 +390,10 @@ export class ImageRequest {
       };
 
       if (queryStringParameters) {
-        Object.entries(queryStringParameters).forEach(([key, value]) => {
-          if (["edits", "headers"].includes(key)) {
+        Object.entries(queryStringParameters).forEach(([searchKey, value]) => {
+          if (["edits", "headers"].includes(searchKey)) {
             try {
-              result[key] = JSON.parse(value);
+              result[searchKey] = JSON.parse(value);
             } catch (error) {
               throw new ImageHandlerError(
                 StatusCodes.BAD_REQUEST,
@@ -398,7 +402,7 @@ export class ImageRequest {
               );
             }
           } else {
-            result[key] = value;
+            result[searchKey] = value;
           }
         });
       }

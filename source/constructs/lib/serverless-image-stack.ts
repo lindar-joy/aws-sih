@@ -9,6 +9,7 @@ import { BackEnd } from "./back-end/back-end-construct";
 import { CommonResources } from "./common-resources/common-resources-construct";
 import { FrontEndConstruct as FrontEnd } from "./front-end/front-end-construct";
 import { SolutionConstructProps, YesNo } from "./types";
+import { CertificateResources as Certificate } from "./certificate/certificate-construct";
 
 export interface ServerlessImageHandlerStackProps extends StackProps {
   readonly solutionId: string;
@@ -116,6 +117,13 @@ export class ServerlessImageHandlerStack extends Stack {
       default: "",
     });
 
+    const customDomainParameter = new CfnParameter(this, "CustomDomainParameter", {
+      type: "String",
+      description:
+        "Alternative domain name for this distribution. For more information, see https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_cloudfront.Distribution.html#domainnames",
+      default: "",
+    });
+
     const fallbackImageS3KeyParameter = new CfnParameter(this, "FallbackImageS3KeyParameter", {
       type: "String",
       description: "The name of the default fallback image object key including prefix. e.g. prefix/image.jpg",
@@ -156,6 +164,7 @@ export class ServerlessImageHandlerStack extends Stack {
       enableDefaultFallbackImage: enableDefaultFallbackImageParameter.valueAsString as YesNo,
       fallbackImageS3Bucket: fallbackImageS3BucketParameter.valueAsString,
       fallbackImageS3KeyBucket: fallbackImageS3KeyParameter.valueAsString,
+      customDomain: customDomainParameter.valueAsString,
     };
 
     const commonResources = new CommonResources(this, "CommonResources", {
@@ -170,6 +179,11 @@ export class ServerlessImageHandlerStack extends Stack {
       conditions: commonResources.conditions,
     });
 
+    const certificate = new Certificate(this, "Certificate", {
+      domain: solutionConstructProps.customDomain,
+      conditions: commonResources.conditions,
+    });
+
     const backEnd = new BackEnd(this, "BackEnd", {
       solutionVersion: props.solutionVersion,
       solutionName: props.solutionName,
@@ -177,6 +191,9 @@ export class ServerlessImageHandlerStack extends Stack {
       logsBucket: commonResources.logsBucket,
       uuid: commonResources.customResources.uuid,
       cloudFrontPriceClass: cloudFrontPriceClassParameter.valueAsString,
+      certificate: certificate.customCertificate,
+      hostedZone: certificate.hostedZone,
+      conditions: commonResources.conditions,
       ...solutionConstructProps,
     });
 
@@ -234,6 +251,10 @@ export class ServerlessImageHandlerStack extends Stack {
             Parameters: [logRetentionPeriodParameter.logicalId],
           },
           {
+            Label: { default: "Custom Domain" },
+            Parameters: [customDomainParameter.logicalId],
+          },
+          {
             Label: {
               default:
                 "Image URL Signature (Note: Enabling signature is not compatible with previous image URLs, which could result in broken image links. Please refer to the implementation guide for details: https://docs.aws.amazon.com/solutions/latest/serverless-image-handler/considerations.html)",
@@ -276,6 +297,9 @@ export class ServerlessImageHandlerStack extends Stack {
           [secretsManagerKeyParameter.logicalId]: {
             default: "SecretsManager Key",
           },
+          [customDomainParameter.logicalId]: {
+            default: "Custom Domain",
+          },
           [enableDefaultFallbackImageParameter.logicalId]: {
             default: "Enable Default Fallback Image",
           },
@@ -296,6 +320,11 @@ export class ServerlessImageHandlerStack extends Stack {
     new CfnOutput(this, "ApiEndpoint", {
       value: `https://${backEnd.domainName}`,
       description: "Link to API endpoint for sending image requests to.",
+    });
+    new CfnOutput(this, "CustomDomain", {
+      value: customDomainParameter.valueAsString,
+      description: "The custom domain name for this distribution",
+      condition: commonResources.conditions.customDomainCondition,
     });
     new CfnOutput(this, "DemoUrl", {
       value: `https://${frontEnd.domainName}/index.html`,

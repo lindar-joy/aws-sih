@@ -21,6 +21,7 @@ export interface Conditions {
   readonly enableSignatureCondition: CfnCondition;
   readonly enableDefaultFallbackImageCondition: CfnCondition;
   readonly enableCorsCondition: CfnCondition;
+  readonly customDomainCondition: CfnCondition;
 }
 
 export interface AppRegistryApplicationProps {
@@ -45,6 +46,9 @@ export class CommonResources extends Construct {
     this.conditions = {
       deployUICondition: new CfnCondition(this, "DeployDemoUICondition", {
         expression: Fn.conditionEquals(props.deployUI, "Yes"),
+      }),
+      customDomainCondition: new CfnCondition(this, "CustomDomainCondition", {
+        expression: Fn.conditionNot(Fn.conditionEquals(props.customDomain, "")),
       }),
       enableSignatureCondition: new CfnCondition(this, "EnableSignatureCondition", {
         expression: Fn.conditionEquals(props.enableSignature, "Yes"),

@@ -15,7 +15,7 @@ export interface DefaultImageRequest {
   headers?: Headers;
 }
 
-interface QueryStringParameters extends Omit<DefaultImageRequest, "bucket" | "key" | "edits" | "headers"> {
+export interface QueryStringParameters extends Omit<DefaultImageRequest, "bucket" | "key" | "edits" | "headers"> {
   signature?: string;
   edits?: string;
   headers?: string;

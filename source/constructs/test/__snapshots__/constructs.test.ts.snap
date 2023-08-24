@@ -3,6 +3,18 @@
 exports[`Serverless Image Handler Stack Snapshot 1`] = `
 {
   "Conditions": {
+    "CommonResourcesCustomDomainCondition07548935": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "CustomDomainParameter",
+            },
+            "",
+          ],
+        },
+      ],
+    },
     "CommonResourcesDeployDemoUICondition308D3B09": {
       "Fn::Equals": [
         {
@@ -34,6 +46,16 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
         },
         "Yes",
       ],
+    },
+  },
+  "Mappings": {
+    "AWSCloudFrontPartitionHostedZoneIdMap": {
+      "aws": {
+        "zoneId": "Z2FDTNDATAQYW2",
+      },
+      "aws-cn": {
+        "zoneId": "Z3RFFRIM2A3IF5",
+      },
     },
   },
   "Metadata": {
@@ -70,6 +92,14 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           },
           "Parameters": [
             "LogRetentionPeriodParameter",
+          ],
+        },
+        {
+          "Label": {
+            "default": "Custom Domain",
+          },
+          "Parameters": [
+            "CustomDomainParameter",
           ],
         },
         {
@@ -113,6 +143,9 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
         },
         "CorsOriginParameter": {
           "default": "CORS Origin",
+        },
+        "CustomDomainParameter": {
+          "default": "Custom Domain",
         },
         "DeployDemoUIParameter": {
           "default": "Deploy Demo UI",
@@ -173,6 +206,13 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       "Description": "Origin value returned in the Access-Control-Allow-Origin header of image handler API responses.",
       "Value": {
         "Ref": "CorsOriginParameter",
+      },
+    },
+    "CustomDomain": {
+      "Condition": "CommonResourcesCustomDomainCondition07548935",
+      "Description": "The custom domain name for this distribution",
+      "Value": {
+        "Ref": "CustomDomainParameter",
       },
     },
     "DemoUrl": {
@@ -244,6 +284,11 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
     "CorsOriginParameter": {
       "Default": "*",
       "Description": "If you selected 'Yes' above, please specify an origin value here. A wildcard (*) value will support any origin. We recommend specifying an origin (i.e. https://example.domain) to restrict cross-site access to your API.",
+      "Type": "String",
+    },
+    "CustomDomainParameter": {
+      "Default": "",
+      "Description": "Alternative domain name for this distribution. For more information, see https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_cloudfront.Distribution.html#domainnames",
       "Type": "String",
     },
     "DeployDemoUIParameter": {
@@ -370,6 +415,44 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       },
       "Type": "AWS::ServiceCatalogAppRegistry::ResourceAssociation",
     },
+    "BackEndARecordD2D9E3A6": {
+      "Condition": "CommonResourcesCustomDomainCondition07548935",
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "BackEndImageHandlerCloudFrontApiGatewayLambdaCloudFrontToApiGatewayCloudFrontDistribution03AA31B2",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": {
+          "Ref": "CertificateHostedZone9368F3A4",
+        },
+        "Name": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "CustomDomainParameter",
+              },
+              ".",
+            ],
+          ],
+        },
+        "Type": "A",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
     "BackEndCachePolicy1DCE9B1B": {
       "Properties": {
         "CachePolicyConfig": {
@@ -407,6 +490,10 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
               "QueryStringBehavior": "whitelist",
               "QueryStrings": [
                 "signature",
+                "edits",
+                "headers",
+                "effort",
+                "outputFormat",
               ],
             },
           },
@@ -453,6 +540,19 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       },
       "Properties": {
         "DistributionConfig": {
+          "Aliases": {
+            "Fn::If": [
+              "CommonResourcesCustomDomainCondition07548935",
+              [
+                {
+                  "Ref": "CustomDomainParameter",
+                },
+              ],
+              {
+                "Ref": "AWS::NoValue",
+              },
+            ],
+          },
           "Comment": "Image Handler Distribution for Serverless Image Handler",
           "CustomErrorResponses": [
             {
@@ -551,6 +651,21 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           ],
           "PriceClass": {
             "Ref": "CloudFrontPriceClassParameter",
+          },
+          "ViewerCertificate": {
+            "Fn::If": [
+              "CommonResourcesCustomDomainCondition07548935",
+              {
+                "AcmCertificateArn": {
+                  "Ref": "CertificateCustomCertificateDCB38E29",
+                },
+                "MinimumProtocolVersion": "TLSv1.2_2021",
+                "SslSupportMethod": "sni-only",
+              },
+              {
+                "Ref": "AWS::NoValue",
+              },
+            ],
           },
         },
         "Tags": [
@@ -1150,7 +1265,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "5fce4d56b220ed8ffc307874bae72e2924596db3c4fafd0b1efc0a9ecc7d5440.zip",
+          "S3Key": "fd5ddf7e2e2103c8a05d4470cd05284f5727665c8cd3303b5f75134fc2162a9b.zip",
         },
         "Description": "sih (v6.2.1): Performs image edits and manipulations",
         "Environment": {
@@ -1277,11 +1392,71 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
             "QueryStringBehavior": "whitelist",
             "QueryStrings": [
               "signature",
+              "edits",
+              "headers",
+              "effort",
+              "outputFormat",
             ],
           },
         },
       },
       "Type": "AWS::CloudFront::OriginRequestPolicy",
+    },
+    "CertificateCustomCertificateDCB38E29": {
+      "Condition": "CommonResourcesCustomDomainCondition07548935",
+      "Properties": {
+        "DomainName": {
+          "Ref": "CustomDomainParameter",
+        },
+        "DomainValidationOptions": [
+          {
+            "DomainName": {
+              "Ref": "CustomDomainParameter",
+            },
+            "HostedZoneId": {
+              "Ref": "CertificateHostedZone9368F3A4",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "TestStack/Certificate/CustomCertificate",
+          },
+          {
+            "Key": "SolutionId",
+            "Value": "S0ABC",
+          },
+        ],
+        "ValidationMethod": "DNS",
+      },
+      "Type": "AWS::CertificateManager::Certificate",
+    },
+    "CertificateHostedZone9368F3A4": {
+      "Condition": "CommonResourcesCustomDomainCondition07548935",
+      "Properties": {
+        "HostedZoneConfig": {
+          "Comment": "Serverless Image Handler custom domain zone",
+        },
+        "HostedZoneTags": [
+          {
+            "Key": "SolutionId",
+            "Value": "S0ABC",
+          },
+        ],
+        "Name": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "CustomDomainParameter",
+              },
+              ".",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Route53::HostedZone",
     },
     "CommonResourcesCustomResourcesCustomResourceAnonymousMetric51363F57": {
       "DeletionPolicy": "Delete",
@@ -1294,6 +1469,9 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "Ref": "CorsEnabledParameter",
         },
         "CustomAction": "sendMetric",
+        "CustomDomain": {
+          "Ref": "CustomDomainParameter",
+        },
         "DeployDemoUi": {
           "Ref": "DeployDemoUIParameter",
         },
