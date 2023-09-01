@@ -17,7 +17,7 @@ env:
 jobs:
   pipeline-job:
     name: Pipeline Job
-    if: github.repository_owner == 'GeKorm'
+    if: github.repository_owner == 'lindar-joy'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
