@@ -37,8 +37,8 @@
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/aws-solutions/serverless-image-handler.git
-cd serverless-image-handler
+git clone https://github.com/GeKorm/aws-sih.git
+cd aws-sih
 export MAIN_DIRECTORY=$PWD
 ```
 
