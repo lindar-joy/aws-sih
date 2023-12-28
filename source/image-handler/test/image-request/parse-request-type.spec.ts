@@ -43,7 +43,7 @@ describe("parseRequestType", () => {
   it("Should pass if the method detects a thumbor request", () => {
     // Arrange
     const event = {
-      path: "/unsafe/filters:brightness(10):contrast(30)/https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Coffee_berries_1.jpg/1200px-Coffee_berries_1.jpg",
+      path: "/thumbor/unsafe/filters:brightness(10):contrast(30)/https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Coffee_berries_1.jpg/1200px-Coffee_berries_1.jpg",
     };
     process.env = {};
 
@@ -72,7 +72,7 @@ describe("parseRequestType", () => {
 
   it("Should pass if the method detects a custom request", () => {
     // Arrange
-    const event = { path: "/additionalImageRequestParameters/image.jpg" };
+    const event = { path: "/thumbor/additionalImageRequestParameters/image.jpg" };
     process.env = {
       REWRITE_MATCH_PATTERN: "matchPattern",
       REWRITE_SUBSTITUTION: "substitutionString",

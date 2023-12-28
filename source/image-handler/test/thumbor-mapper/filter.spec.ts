@@ -580,7 +580,7 @@ describe("filter", () => {
 
   it("Should pass when format and quality filters are passed and file does not have extension", () => {
     // Arrange
-    const path = "/filters:format(jpeg)/filters:quality(50)/image_without_extension";
+    const path = "/thumbor/filters:format(jpeg)/filters:quality(50)/image_without_extension";
 
     // Act
     const thumborMapper = new ThumborMapper();
@@ -593,7 +593,7 @@ describe("filter", () => {
 
   it("Should pass when quality and format filters are passed and file does not have extension", () => {
     // Arrange
-    const path = "/filters:quality(50)/filters:format(jpeg)/image_without_extension";
+    const path = "/thumbor/filters:quality(50)/filters:format(jpeg)/image_without_extension";
 
     // Act
     const thumborMapper = new ThumborMapper();
@@ -606,7 +606,7 @@ describe("filter", () => {
 
   it("Should pass when quality and format filters are passed and file has extension", () => {
     // Arrange
-    const path = "/filters:quality(50)/filters:format(jpeg)/image_without_extension.png";
+    const path = "/thumbor/filters:quality(50)/filters:format(jpeg)/image_without_extension.png";
 
     // Act
     const thumborMapper = new ThumborMapper();
@@ -619,7 +619,7 @@ describe("filter", () => {
 
   it("Should pass if the proper edit translations are applied and in the correct order", () => {
     // Arrange
-    const path = "/fit-in/200x300/filters:grayscale()/test-image-001.jpg";
+    const path = "/thumbor/fit-in/200x300/filters:grayscale()/test-image-001.jpg";
 
     // Act
     const thumborMapper = new ThumborMapper();
@@ -641,7 +641,7 @@ describe("filter", () => {
 
   it("Should pass for fit-in combined with watermark in folder", () => {
     // watermark params: bucket, key, xPos, yPos, alpha, wRatio, hRatio
-    const path = "/fit-in/400x400/filters:watermark(bucket,folder/key.png,0,0)/image.jpg";
+    const path = "/thumbor/fit-in/400x400/filters:watermark(bucket,folder/key.png,0,0)/image.jpg";
 
     // Act
     const thumborMapper = new ThumborMapper();
@@ -673,7 +673,7 @@ describe("filter", () => {
 
   it("Should pass for fit-in combined with watermark not in folder", () => {
     // watermark params: bucket, key, xPos, yPos, alpha, wRatio, hRatio
-    const path = "/fit-in/400x400/filters:watermark(bucket,key.png,0,0)/image.jpg";
+    const path = "/thumbor/fit-in/400x400/filters:watermark(bucket,key.png,0,0)/image.jpg";
 
     // Act
     const thumborMapper = new ThumborMapper();

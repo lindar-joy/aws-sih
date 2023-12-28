@@ -301,6 +301,7 @@ export class ImageRequest {
 
       return decodeURIComponent(
         path
+          .replace("thumbor/", "")
           .replace(/\/\d+x\d+:\d+x\d+(?=\/)/g, "")
           .replace(/\/\d+x\d+(?=\/)/g, "")
           .replace(/filters:watermark\(.*\)/u, "")
@@ -327,9 +328,9 @@ export class ImageRequest {
    */
   public parseRequestType(event: ImageHandlerEvent): RequestTypes {
     const { path } = event;
-    const matchThumbor1 = /^(\/?)(?<commands>fit-in|filters:.+\(.*\)|unsafe)/i;
-    const matchThumbor2 = /((.(?!(\.[^.\\/]+$)))*$)/i;
-    const matchThumbor3 = /.*(\.jpg$|\.jpeg$|.\.png$|\.webp$|\.tiff$|\.tif$|\.svg$|\.gif$)/i;
+    const matchThumbor1 = /^\/?(?<thumbor>thumbor\/)(?<commands>(?:fit-in)?|(?:filters:.+\(.*\))?|(?:unsafe)?)?/i;
+    const matchThumbor2 = /(?:.(?!\.[^.\\/]+$))*$/i; // NOSONAR
+    const matchThumbor3 = /.*(?:\.jpg$|\.jpeg$|.\.png$|\.webp$|\.tiff$|\.tif$|\.svg$|\.gif$)/i; // NOSONAR
     const { REWRITE_MATCH_PATTERN, REWRITE_SUBSTITUTION } = process.env;
     const definedEnvironmentVariables =
       REWRITE_MATCH_PATTERN !== "" &&
@@ -337,14 +338,17 @@ export class ImageRequest {
       REWRITE_MATCH_PATTERN !== undefined &&
       REWRITE_SUBSTITUTION !== undefined;
 
-    if (path.match(matchThumbor1)?.groups?.commands && (matchThumbor2.test(path) || matchThumbor3.test(path))) {
+    if (s3UrlPattern.test(path) && !matchThumbor1.test(path)) {
       // use sharp
-      return RequestTypes.THUMBOR;
+      return RequestTypes.DEFAULT;
     } else if (definedEnvironmentVariables) {
       // use rewrite function then thumbor mappings
       return RequestTypes.CUSTOM;
+    } else if (matchThumbor1.test(path) && (matchThumbor2.test(path) || matchThumbor3.test(path))) {
+      // use thumbor
+      return RequestTypes.THUMBOR;
     } else if (s3UrlPattern.test(path)) {
-      // use thumbor mappings
+      // use sharp
       return RequestTypes.DEFAULT;
     } else {
       throw new ImageHandlerError(
@@ -443,8 +447,9 @@ export class ImageRequest {
    */
   public getOutputFormat(event: ImageHandlerEvent, requestType: RequestTypes = undefined): ImageFormatTypes {
     const { AUTO_WEBP } = process.env;
+    const accept = event.headers?.Accept || event.headers?.accept;
 
-    if (AUTO_WEBP === "Yes" && event.headers.Accept && event.headers.Accept.includes(ContentTypes.WEBP)) {
+    if (AUTO_WEBP === "Yes" && accept && accept.includes(ContentTypes.WEBP)) {
       return ImageFormatTypes.WEBP;
     } else if (requestType === RequestTypes.DEFAULT) {
       const decoded = this.decodeRequest(event);
@@ -469,6 +474,7 @@ export class ImageRequest {
       case "FFD8FFED":
       case "FFD8FFEE":
       case "FFD8FFE1":
+      case "FFD8FFE2":
         return ContentTypes.JPEG;
       case "52494646":
         return ContentTypes.WEBP;

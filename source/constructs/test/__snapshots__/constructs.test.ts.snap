@@ -395,7 +395,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "Solutions:ApplicationType": "AWS-Solutions",
           "Solutions:SolutionID": "S0ABC",
           "Solutions:SolutionName": "sih",
-          "Solutions:SolutionVersion": "v6.2.1",
+          "Solutions:SolutionVersion": "v6.2.4",
         },
       },
       "Type": "AWS::ServiceCatalogAppRegistry::Application",
@@ -478,7 +478,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
               "CookieBehavior": "none",
             },
             "EnableAcceptEncodingBrotli": false,
-            "EnableAcceptEncodingGzip": true,
+            "EnableAcceptEncodingGzip": false,
             "HeadersConfig": {
               "HeaderBehavior": "whitelist",
               "Headers": [
@@ -678,6 +678,16 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       "Type": "AWS::CloudFront::Distribution",
     },
     "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApi5A77D109": {
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W59",
+              "reason": "AWS::ApiGateway::Method AuthorizationType is set to 'NONE' because API Gateway behind CloudFront does not support AWS_IAM authentication",
+            },
+          ],
+        },
+      },
       "Properties": {
         "BinaryMediaTypes": [
           "*/*",
@@ -776,16 +786,6 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       "Type": "AWS::Lambda::Permission",
     },
     "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiANYE4494B31": {
-      "Metadata": {
-        "cfn_nag": {
-          "rules_to_suppress": [
-            {
-              "id": "W59",
-              "reason": "AWS::ApiGateway::Method AuthorizationType is set to 'NONE' because API Gateway behind CloudFront does not support AWS_IAM authentication",
-            },
-          ],
-        },
-      },
       "Properties": {
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
@@ -907,7 +907,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiDeployment663240D6235994dc47b5d82fe8cf9199608ba4c9": {
+    "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiDeployment663240D6bb2931f4d7f47b51b7b40b3fd0d7001b": {
       "DependsOn": [
         "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiproxyANY8F9763E1",
         "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiproxyBDF0A131",
@@ -918,7 +918,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "rules_to_suppress": [
             {
               "id": "W45",
-              "reason": "ApiGateway has AccessLogging enabled in AWS::ApiGateway::Stage resource, but cfn_nag checkes for it in AWS::ApiGateway::Deployment resource",
+              "reason": "ApiGateway has AccessLogging enabled in AWS::ApiGateway::Stage resource, but cfn_nag checks for it in AWS::ApiGateway::Deployment resource",
             },
           ],
         },
@@ -943,7 +943,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "Format": "{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","user":"$context.identity.user","caller":"$context.identity.caller","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath","status":"$context.status","protocol":"$context.protocol","responseLength":"$context.responseLength"}",
         },
         "DeploymentId": {
-          "Ref": "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiDeployment663240D6235994dc47b5d82fe8cf9199608ba4c9",
+          "Ref": "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiDeployment663240D6bb2931f4d7f47b51b7b40b3fd0d7001b",
         },
         "MethodSettings": [
           {
@@ -990,16 +990,6 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       "Type": "AWS::ApiGateway::UsagePlan",
     },
     "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiproxyANY8F9763E1": {
-      "Metadata": {
-        "cfn_nag": {
-          "rules_to_suppress": [
-            {
-              "id": "W59",
-              "reason": "AWS::ApiGateway::Method AuthorizationType is set to 'NONE' because API Gateway behind CloudFront does not support AWS_IAM authentication",
-            },
-          ],
-        },
-      },
       "Properties": {
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
@@ -1265,9 +1255,9 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "3312e4d7a059d31a6bdd89478f9d8e6bcc4edabad92c042489433cb1a4528d98.zip",
+          "S3Key": "Omitted to remove snapshot dependency on hash",
         },
-        "Description": "sih (v6.2.1): Performs image edits and manipulations",
+        "Description": "sih (v6.2.4): Performs image edits and manipulations",
         "Environment": {
           "Variables": {
             "AUTO_WEBP": {
@@ -1313,14 +1303,14 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs20.x",
         "Tags": [
           {
             "Key": "SolutionId",
             "Value": "S0ABC",
           },
         ],
-        "Timeout": 900,
+        "Timeout": 29,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -1595,15 +1585,15 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "0245c422cd64ff4efe46942d3a1bedd06567c977cda396e92e21b6dc363c1939.zip",
+          "S3Key": "Omitted to remove snapshot dependency on hash",
         },
-        "Description": "sih (v6.2.1): Custom resource",
+        "Description": "sih (v6.2.4): Custom resource",
         "Environment": {
           "Variables": {
             "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
             "RETRY_SECONDS": "5",
             "SOLUTION_ID": "S0ABC",
-            "SOLUTION_VERSION": "v6.2.1",
+            "SOLUTION_VERSION": "v6.2.4",
           },
         },
         "Handler": "index.handler",
@@ -1614,7 +1604,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs20.x",
         "Tags": [
           {
             "Key": "SolutionId",
@@ -1759,7 +1749,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "e2277687077a2abf9ae1af1cc9565e6715e2ebb62f79ec53aa75a1af9298f642.zip",
+          "S3Key": "Omitted to remove snapshot dependency on hash",
         },
         "Description": "/opt/awscli/aws",
       },
@@ -1785,7 +1775,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           },
         ],
         "SourceObjectKeys": [
-          "297994e5975cd83b2ec43f52720181be7d5daf08af8987cc4d5749f99db8f777.zip",
+          "c301c2cce52bb1b36720a115d657907f3ec9fa20bd385b4d81bf451fbe77fe4b.zip",
         ],
       },
       "Type": "Custom::CDKBucketDeployment",
@@ -1938,7 +1928,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "S3Bucket": {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "9eb41a5505d37607ac419321497a4f8c21cf0ee1f9b4a6b29aa04301aea5c7fd.zip",
+          "S3Key": "Omitted to remove snapshot dependency on hash",
         },
         "Environment": {
           "Variables": {
@@ -2107,7 +2097,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "applicationType": "AWS-Solutions",
           "solutionID": "S0ABC",
           "solutionName": "sih",
-          "version": "v6.2.1",
+          "version": "v6.2.4",
         },
         "Description": "Attribute group for solution information",
         "Name": {

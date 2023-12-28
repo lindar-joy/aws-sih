@@ -32,7 +32,7 @@
 ### Prerequisites
 
 - [AWS Command Line Interface](https://aws.amazon.com/cli/)
-- Node.js 18.x or later
+- Node.js 20.x or later
 
 ### 1. Clone the repository
 

@@ -25,8 +25,9 @@ export class ThumborMapper {
     // to apply the `quality` filter to the target image format.
     const filters =
       path
-        .match(/filters:[^)]+/g)
-        ?.map((filter) => `${filter})`)
+        .match(/filters(:[^)]*\))+/g)
+        ?.flatMap((filter) => filter.split(":").slice(1))
+        ?.map((filter) => `filters:${filter}`)
         .sort() ?? [];
     for (const filter of filters) {
       edits = this.mapFilter(filter, fileFormat, edits);
@@ -281,7 +282,7 @@ export class ThumborMapper {
    * @returns Cumulative edits based on the previous edits and the current filter.
    */
   public mapFilter(filterExpression: string, fileFormat: ImageFormatTypes, previousEdits: ImageEdits = {}): ImageEdits {
-    const matched = filterExpression.match(/:(.+)\((.*)\)/);
+    const matched = filterExpression.match(/:(.+)\((.*)\)/); // NOSONAR
     const [_, filterName, filterValue] = matched;
     const currentEdits = { ...previousEdits };
 

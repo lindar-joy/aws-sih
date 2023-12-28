@@ -33,6 +33,7 @@ import { addCfnSuppressRules } from "../../utils/utils";
 import { QueryStringParameters } from "../../../image-handler/lib";
 import { SolutionConstructProps } from "../types";
 import { Conditions } from "../common-resources/common-resources-construct";
+import * as api from "aws-cdk-lib/aws-apigateway";
 
 const queryStringParameters: (keyof QueryStringParameters)[] = [
   "signature",
@@ -106,8 +107,8 @@ export class BackEnd extends Construct {
     const imageHandlerLambdaFunction = new NodejsFunction(this, "ImageHandlerLambdaFunction", {
       description: `${props.solutionName} (${props.solutionVersion}): Performs image edits and manipulations`,
       memorySize: 1024,
-      runtime: Runtime.NODEJS_18_X,
-      timeout: Duration.minutes(15),
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(29),
       role: imageHandlerLambdaFunctionRole,
       entry: path.join(__dirname, "../../../image-handler/index.ts"),
       environment: {
@@ -158,7 +159,7 @@ export class BackEnd extends Construct {
       defaultTtl: Duration.days(1),
       minTtl: Duration.seconds(1),
       maxTtl: Duration.days(365),
-      enableAcceptEncodingGzip: true,
+      enableAcceptEncodingGzip: false,
       headerBehavior: CacheHeaderBehavior.allowList("origin", "accept"),
       queryStringBehavior: CacheQueryStringBehavior.allowList(...queryStringParameters),
     });
@@ -216,6 +217,9 @@ export class BackEnd extends Construct {
         stageName: "image",
       },
       binaryMediaTypes: ["*/*"],
+      defaultMethodOptions: {
+        authorizationType: api.AuthorizationType.NONE,
+      },
     };
 
     const imageHandlerCloudFrontApiGatewayLambda = new CloudFrontToApiGatewayToLambda(
@@ -229,6 +233,14 @@ export class BackEnd extends Construct {
         apiGatewayProps,
       }
     );
+
+    addCfnSuppressRules(imageHandlerCloudFrontApiGatewayLambda.apiGateway, [
+      {
+        id: "W59",
+        reason:
+          "AWS::ApiGateway::Method AuthorizationType is set to 'NONE' because API Gateway behind CloudFront does not support AWS_IAM authentication",
+      },
+    ]);
 
     imageHandlerCloudFrontApiGatewayLambda.apiGateway.node.tryRemoveChild("Endpoint"); // we don't need the RestApi endpoint in the outputs
     (
