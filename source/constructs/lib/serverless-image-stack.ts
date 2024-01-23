@@ -2,20 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PriceClass } from "aws-cdk-lib/aws-cloudfront";
-import { Aspects, CfnMapping, CfnOutput, CfnParameter, Stack, StackProps, Tags } from "aws-cdk-lib";
+import { Aspects, CfnMapping, CfnOutput, CfnParameter, Stack, Tags } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { ConditionAspect, SuppressLambdaFunctionCfnRulesAspect } from "../utils/aspects";
 import { BackEnd } from "./back-end/back-end-construct";
 import { CommonResources } from "./common-resources/common-resources-construct";
 import { FrontEndConstruct as FrontEnd } from "./front-end/front-end-construct";
-import { SolutionConstructProps, YesNo } from "./types";
-import { CertificateResources as Certificate } from "./certificate/certificate-construct";
-
-export interface ServerlessImageHandlerStackProps extends StackProps {
-  readonly solutionId: string;
-  readonly solutionName: string;
-  readonly solutionVersion: string;
-}
+import { ServerlessImageHandlerStackProps, SolutionConstructProps, YesNo } from "./types";
 
 export class ServerlessImageHandlerStack extends Stack {
   constructor(scope: Construct, id: string, props: ServerlessImageHandlerStackProps) {
@@ -179,11 +172,6 @@ export class ServerlessImageHandlerStack extends Stack {
       conditions: commonResources.conditions,
     });
 
-    const certificate = new Certificate(this, "Certificate", {
-      domain: solutionConstructProps.customDomain,
-      conditions: commonResources.conditions,
-    });
-
     const backEnd = new BackEnd(this, "BackEnd", {
       solutionVersion: props.solutionVersion,
       solutionName: props.solutionName,
@@ -191,8 +179,8 @@ export class ServerlessImageHandlerStack extends Stack {
       logsBucket: commonResources.logsBucket,
       uuid: commonResources.customResources.uuid,
       cloudFrontPriceClass: cloudFrontPriceClassParameter.valueAsString,
-      certificate: certificate.customCertificate,
-      hostedZone: certificate.hostedZone,
+      certificate: props.certificate,
+      hostedZone: props.hostedZone,
       conditions: commonResources.conditions,
       ...solutionConstructProps,
     });

@@ -6,15 +6,19 @@ import { IBucket } from "aws-cdk-lib/aws-s3";
 import { ArnFormat, Aws, CfnCondition, Fn, Stack, Tags } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { addCfnCondition } from "../../utils/utils";
-import { SolutionConstructProps } from "../types";
+import { CertificateConstructProps, SolutionConstructProps } from "../types";
 import { CustomResourcesConstruct } from "./custom-resources/custom-resource-construct";
 import * as appreg from "@aws-cdk/aws-servicecatalogappregistry-alpha";
 
-export interface CommonResourcesProps extends SolutionConstructProps {
+interface CommonProps {
   readonly solutionId: string;
   readonly solutionVersion: string;
   readonly solutionName: string;
 }
+
+export interface CommonResourcesProps extends SolutionConstructProps, CommonProps {}
+
+export interface DomainResourcesProps extends CertificateConstructProps, CommonProps {}
 
 export interface Conditions {
   readonly deployUICondition: CfnCondition;
@@ -23,6 +27,8 @@ export interface Conditions {
   readonly enableCorsCondition: CfnCondition;
   readonly customDomainCondition: CfnCondition;
 }
+
+export type DomainConditions = Pick<Conditions, "customDomainCondition">;
 
 export interface AppRegistryApplicationProps {
   readonly description: string;
@@ -116,5 +122,19 @@ export class CommonResources extends Construct {
       },
     });
     attributeGroup.associateWith(application);
+  }
+}
+
+export class DomainResources extends Construct {
+  public readonly conditions: DomainConditions;
+
+  constructor(scope: Construct, id: string, props: DomainResourcesProps) {
+    super(scope, id);
+
+    this.conditions = {
+      customDomainCondition: new CfnCondition(this, "CustomDomainCondition", {
+        expression: Fn.conditionNot(Fn.conditionEquals(props.customDomain, "")),
+      }),
+    };
   }
 }

@@ -3,6 +3,8 @@
 
 import { App, DefaultStackSynthesizer } from "aws-cdk-lib";
 import { ServerlessImageHandlerStack } from "../lib/serverless-image-stack";
+import { CertificateStack } from "../lib/certificate-stack";
+import { HostedZoneStack } from "../lib/hosted-zone-stack";
 
 // CDK and default deployment
 let synthesizer = new DefaultStackSynthesizer({
@@ -10,7 +12,7 @@ let synthesizer = new DefaultStackSynthesizer({
 });
 
 // Solutions pipeline deployment
-const { DIST_OUTPUT_BUCKET, SOLUTION_NAME, VERSION } = process.env;
+const { DIST_OUTPUT_BUCKET, SOLUTION_NAME, VERSION, AWS_REGION, CDK_DEFAULT_REGION } = process.env;
 if (DIST_OUTPUT_BUCKET && SOLUTION_NAME && VERSION)
   synthesizer = new DefaultStackSynthesizer({
     generateBootstrapVersionRule: false,
@@ -20,12 +22,39 @@ if (DIST_OUTPUT_BUCKET && SOLUTION_NAME && VERSION)
 
 const app = new App();
 const solutionDisplayName = "Serverless Image Handler";
-const description = `(${app.node.tryGetContext("solutionId")}) - ${solutionDisplayName}. Version ${VERSION ?? app.node.tryGetContext("solutionVersion")}`;
-// eslint-disable-next-line no-new
-new ServerlessImageHandlerStack(app, "ServerlessImageHandlerStack", {
-  synthesizer: synthesizer,
-  description: description,
+const region = AWS_REGION || CDK_DEFAULT_REGION;
+const description = `(${app.node.tryGetContext("solutionId")}) - ${solutionDisplayName}. Version ${
+  VERSION ?? app.node.tryGetContext("solutionVersion")
+}`;
+
+const hostedZoneStack = new HostedZoneStack(app, "HostedZoneStack", {
+  env: { region },
+  crossRegionReferences: true,
   solutionId: app.node.tryGetContext("solutionId"),
   solutionVersion: app.node.tryGetContext("solutionVersion"),
   solutionName: app.node.tryGetContext("solutionName"),
+});
+
+const certificateStack = new CertificateStack(app, "CertificateStack", {
+  env: {
+    region: "us-east-1",
+  },
+  hostedZone: hostedZoneStack.hostedZone,
+  crossRegionReferences: true,
+  solutionId: app.node.tryGetContext("solutionId"),
+  solutionVersion: app.node.tryGetContext("solutionVersion"),
+  solutionName: app.node.tryGetContext("solutionName"),
+});
+
+// eslint-disable-next-line no-new
+new ServerlessImageHandlerStack(app, "ServerlessImageHandlerStack", {
+  env: { region },
+  synthesizer,
+  description,
+  solutionId: app.node.tryGetContext("solutionId"),
+  solutionVersion: app.node.tryGetContext("solutionVersion"),
+  solutionName: app.node.tryGetContext("solutionName"),
+  certificate: certificateStack.certificate,
+  hostedZone: hostedZoneStack.hostedZone,
+  crossRegionReferences: true,
 });

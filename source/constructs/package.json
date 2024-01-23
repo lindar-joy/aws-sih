@@ -18,7 +18,7 @@
     "pretest": "npm run clean:install",
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "overrideWarningsEnabled=false jest --coverage"
+    "test": "overrideWarningsEnabled=false jest --coverage --updateSnapshot"
   },
   "devDependencies": {
     "@aws-cdk/aws-servicecatalogappregistry-alpha": "v2.118.0-alpha.0",

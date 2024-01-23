@@ -436,7 +436,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           },
         },
         "HostedZoneId": {
-          "Ref": "CertificateHostedZone9368F3A4",
+          "Fn::ImportValue": "HostedZoneTestStack:ExportsOutputRefHostedZoneF1391A64D131F118",
         },
         "Name": {
           "Fn::Join": [
@@ -444,6 +444,10 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
             [
               {
                 "Ref": "CustomDomainParameter",
+              },
+              ".",
+              {
+                "Fn::ImportValue": "HostedZoneTestStack:ExportsOutputRefCustomDomainParameter339399C4",
               },
               ".",
             ],
@@ -657,7 +661,10 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
               "CommonResourcesCustomDomainCondition07548935",
               {
                 "AcmCertificateArn": {
-                  "Ref": "CertificateCustomCertificateDCB38E29",
+                  "Fn::GetAtt": [
+                    "ExportsReader8B249524",
+                    "/cdk/exports/TestStack/CertificateTestStackuseast1RefCertificateCustomCertificateDCB38E2952572462",
+                  ],
                 },
                 "MinimumProtocolVersion": "TLSv1.2_2021",
                 "SslSupportMethod": "sni-only",
@@ -725,11 +732,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
               {
                 "Ref": "AWS::Partition",
               },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
+              ":execute-api:eu-west-2:",
               {
                 "Ref": "AWS::AccountId",
               },
@@ -766,11 +769,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
               {
                 "Ref": "AWS::Partition",
               },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
+              ":execute-api:eu-west-2:",
               {
                 "Ref": "AWS::AccountId",
               },
@@ -800,11 +799,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
                 {
                   "Ref": "AWS::Partition",
                 },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
+                ":apigateway:eu-west-2:lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
                     "BackEndImageHandlerLambdaFunctionADEF7FF2",
@@ -907,7 +902,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiDeployment663240D6bb2931f4d7f47b51b7b40b3fd0d7001b": {
+    "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiDeployment663240D686b04a40ccb198432a533b03c818e607": {
       "DependsOn": [
         "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiproxyANY8F9763E1",
         "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiproxyBDF0A131",
@@ -943,7 +938,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
           "Format": "{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","user":"$context.identity.user","caller":"$context.identity.caller","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath","status":"$context.status","protocol":"$context.protocol","responseLength":"$context.responseLength"}",
         },
         "DeploymentId": {
-          "Ref": "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiDeployment663240D6bb2931f4d7f47b51b7b40b3fd0d7001b",
+          "Ref": "BackEndImageHandlerCloudFrontApiGatewayLambdaLambdaRestApiDeployment663240D686b04a40ccb198432a533b03c818e607",
         },
         "MethodSettings": [
           {
@@ -1004,11 +999,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
                 {
                   "Ref": "AWS::Partition",
                 },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
+                ":apigateway:eu-west-2:lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
                     "BackEndImageHandlerLambdaFunctionADEF7FF2",
@@ -1047,11 +1038,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
               {
                 "Ref": "AWS::Partition",
               },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
+              ":execute-api:eu-west-2:",
               {
                 "Ref": "AWS::AccountId",
               },
@@ -1088,11 +1075,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
               {
                 "Ref": "AWS::Partition",
               },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
+              ":execute-api:eu-west-2:",
               {
                 "Ref": "AWS::AccountId",
               },
@@ -1151,11 +1134,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
                     {
                       "Ref": "AWS::Partition",
                     },
-                    ":logs:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
+                    ":logs:eu-west-2:",
                     {
                       "Ref": "AWS::AccountId",
                     },
@@ -1253,7 +1232,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-eu-west-2",
           },
           "S3Key": "Omitted to remove snapshot dependency on hash",
         },
@@ -1392,62 +1371,6 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       },
       "Type": "AWS::CloudFront::OriginRequestPolicy",
     },
-    "CertificateCustomCertificateDCB38E29": {
-      "Condition": "CommonResourcesCustomDomainCondition07548935",
-      "Properties": {
-        "DomainName": {
-          "Ref": "CustomDomainParameter",
-        },
-        "DomainValidationOptions": [
-          {
-            "DomainName": {
-              "Ref": "CustomDomainParameter",
-            },
-            "HostedZoneId": {
-              "Ref": "CertificateHostedZone9368F3A4",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "TestStack/Certificate/CustomCertificate",
-          },
-          {
-            "Key": "SolutionId",
-            "Value": "S0ABC",
-          },
-        ],
-        "ValidationMethod": "DNS",
-      },
-      "Type": "AWS::CertificateManager::Certificate",
-    },
-    "CertificateHostedZone9368F3A4": {
-      "Condition": "CommonResourcesCustomDomainCondition07548935",
-      "Properties": {
-        "HostedZoneConfig": {
-          "Comment": "Serverless Image Handler custom domain zone",
-        },
-        "HostedZoneTags": [
-          {
-            "Key": "SolutionId",
-            "Value": "S0ABC",
-          },
-        ],
-        "Name": {
-          "Fn::Join": [
-            "",
-            [
-              {
-                "Ref": "CustomDomainParameter",
-              },
-              ".",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Route53::HostedZone",
-    },
     "CommonResourcesCustomResourcesCustomResourceAnonymousMetric51363F57": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -1583,7 +1506,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-eu-west-2",
           },
           "S3Key": "Omitted to remove snapshot dependency on hash",
         },
@@ -1659,11 +1582,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
                         {
                           "Ref": "AWS::Partition",
                         },
-                        ":logs:",
-                        {
-                          "Ref": "AWS::Region",
-                        },
-                        ":",
+                        ":logs:eu-west-2:",
                         {
                           "Ref": "AWS::AccountId",
                         },
@@ -1747,7 +1666,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       "Properties": {
         "Content": {
           "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-eu-west-2",
           },
           "S3Key": "Omitted to remove snapshot dependency on hash",
         },
@@ -1774,7 +1693,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
         },
         "SourceBucketNames": [
           {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-eu-west-2",
           },
         ],
         "SourceObjectKeys": [
@@ -1929,7 +1848,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       "Properties": {
         "Code": {
           "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-eu-west-2",
           },
           "S3Key": "Omitted to remove snapshot dependency on hash",
         },
@@ -2022,7 +1941,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
                       },
                       ":s3:::",
                       {
-                        "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+                        "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-eu-west-2",
                       },
                     ],
                   ],
@@ -2037,7 +1956,7 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
                       },
                       ":s3:::",
                       {
-                        "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+                        "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-eu-west-2",
                       },
                       "/*",
                     ],
@@ -2094,6 +2013,86 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "CustomCrossRegionExportReaderCustomResourceProviderHandler46647B68": {
+      "DependsOn": [
+        "CustomCrossRegionExportReaderCustomResourceProviderRole10531BBD",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-eu-west-2",
+          },
+          "S3Key": "Omitted to remove snapshot dependency on hash",
+        },
+        "Handler": "__entrypoint__.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "CustomCrossRegionExportReaderCustomResourceProviderRole10531BBD",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CustomCrossRegionExportReaderCustomResourceProviderRole10531BBD": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:\${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          },
+        ],
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "ssm:AddTagsToResource",
+                    "ssm:RemoveTagsFromResource",
+                    "ssm:GetParameters",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition",
+                        },
+                        ":ssm:eu-west-2:",
+                        {
+                          "Ref": "AWS::AccountId",
+                        },
+                        ":parameter/cdk/exports/TestStack/*",
+                      ],
+                    ],
+                  },
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "Inline",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
     "DefaultApplicationAttributeGroup41AD7209": {
       "Properties": {
         "Attributes": {
@@ -2136,6 +2135,26 @@ exports[`Serverless Image Handler Stack Snapshot 1`] = `
         },
       },
       "Type": "AWS::ServiceCatalogAppRegistry::AttributeGroupAssociation",
+    },
+    "ExportsReader8B249524": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "ReaderProps": {
+          "imports": {
+            "/cdk/exports/TestStack/CertificateTestStackuseast1RefCertificateCustomCertificateDCB38E2952572462": "{{resolve:ssm:/cdk/exports/TestStack/CertificateTestStackuseast1RefCertificateCustomCertificateDCB38E2952572462}}",
+          },
+          "prefix": "TestStack",
+          "region": "eu-west-2",
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomCrossRegionExportReaderCustomResourceProviderHandler46647B68",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::CrossRegionExportReader",
+      "UpdateReplacePolicy": "Delete",
     },
     "FrontEndDistributionToS3CloudFrontDistribution15FE13D0": {
       "Condition": "CommonResourcesDeployDemoUICondition308D3B09",
