@@ -110,7 +110,7 @@ export class ServerlessImageHandlerStack extends Stack {
       default: "",
     });
 
-    const customDomain: string | undefined = this.node.tryGetContext("customDomain");
+    const customDomain: YesNo | undefined = this.node.tryGetContext("customDomain");
 
     const fallbackImageS3KeyParameter = new CfnParameter(this, "FallbackImageS3KeyParameter", {
       type: "String",

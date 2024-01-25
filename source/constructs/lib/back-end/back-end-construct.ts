@@ -10,6 +10,9 @@ import {
   CacheQueryStringBehavior,
   CfnDistribution,
   DistributionProps,
+  Function,
+  FunctionCode,
+  FunctionEventType,
   IOrigin,
   OriginRequestPolicy,
   OriginSslPolicy,
@@ -31,9 +34,10 @@ import { CloudFrontToApiGatewayToLambda } from "@aws-solutions-constructs/aws-cl
 
 import { addCfnSuppressRules } from "../../utils/utils";
 import { QueryStringParameters } from "../../../image-handler/lib";
-import { SolutionConstructProps } from "../types";
+import { SolutionConstructProps, CapitalizeInterface, YesNo } from "../types";
 import { Conditions } from "../common-resources/common-resources-construct";
 import * as api from "aws-cdk-lib/aws-apigateway";
+import OriginShieldProperty = CfnDistribution.OriginShieldProperty;
 
 const queryStringParameters: (keyof QueryStringParameters)[] = [
   "signature",
@@ -184,6 +188,25 @@ export class BackEnd extends Construct {
       originSslProtocols: [OriginSslPolicy.TLS_V1_1, OriginSslPolicy.TLS_V1_2],
     });
 
+    // Inspired by https://github.com/aws-solutions/serverless-image-handler/issues/304#issuecomment-1172255508
+    // Add a cloudfront Function to normalize the accept header
+    const normalizeAcceptHeaderFunction = new Function(this, "NormalizeAcceptHeaderFunction", {
+      functionName: `normalize-accept-headers-${Aws.REGION}`,
+      code: FunctionCode.fromInline(`
+function handler(event) {
+  if (event.request.headers && event.request.headers.accept && event.request.headers.accept.value) {
+    let resultingHeader = "image/jpg";
+    const acceptheadervalue = event.request.headers.accept.value;
+    if (acceptheadervalue.includes("image/webp")) {
+      resultingHeader = "image/webp";
+    }
+    event.request.headers.accept = { value: resultingHeader };
+  }
+  return event.request;
+}
+`),
+    });
+
     const cloudFrontDistributionProps: DistributionProps = {
       comment: "Image Handler Distribution for Serverless Image Handler",
       defaultBehavior: {
@@ -192,6 +215,12 @@ export class BackEnd extends Construct {
         viewerProtocolPolicy: ViewerProtocolPolicy.HTTPS_ONLY,
         originRequestPolicy,
         cachePolicy,
+        functionAssociations: [
+          {
+            function: normalizeAcceptHeaderFunction,
+            eventType: FunctionEventType.VIEWER_REQUEST,
+          },
+        ],
       },
       domainNames: props.customDomain ? [props.customDomain] : undefined,
       certificate: props.certificate,
@@ -270,6 +299,20 @@ export class BackEnd extends Construct {
         ),
         recordName: props.customDomain,
       });
+    }
+
+    const originShieldEnabled = (this.node.tryGetContext("originShieldEnabled") as YesNo | undefined) === "Yes";
+    const originShieldRegion: string = this.node.tryGetContext("originShieldRegion");
+
+    if (originShieldEnabled) {
+      let originShieldProps: CapitalizeInterface<OriginShieldProperty> = { Enabled: true };
+      if (originShieldRegion) {
+        originShieldProps = { ...originShieldProps, OriginShieldRegion: originShieldRegion };
+      }
+
+      (
+        imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.node.defaultChild as CfnDistribution
+      ).addPropertyOverride("DistributionConfig.Origins.0.OriginShield", originShieldProps);
     }
   }
 }

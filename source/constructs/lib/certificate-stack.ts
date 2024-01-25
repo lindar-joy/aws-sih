@@ -3,7 +3,7 @@
 
 import { Stack } from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { CommonStackProps } from "./types";
+import { CommonStackProps, YesNo } from "./types";
 import { CertificateResources } from "./certificate/certificate-construct";
 import { HostedZone } from "aws-cdk-lib/aws-route53";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
@@ -14,7 +14,7 @@ export class CertificateStack extends Stack {
   constructor(scope: Construct, id: string, props: CommonStackProps & { hostedZone: HostedZone }) {
     super(scope, id, props);
 
-    const customDomain: string = this.node.tryGetContext("customDomain");
+    const customDomain: YesNo = this.node.tryGetContext("customDomain");
 
     const certificateConstructProps = { customDomain };
 

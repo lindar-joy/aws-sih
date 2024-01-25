@@ -35,3 +35,7 @@ export interface ServerlessImageHandlerStackProps extends CommonStackProps {
   readonly certificate?: Certificate;
   readonly hostedZone?: HostedZone;
 }
+
+export type CapitalizeInterface<Type> = {
+  [Property in keyof Type as Capitalize<string & Property>]: Type[Property];
+};

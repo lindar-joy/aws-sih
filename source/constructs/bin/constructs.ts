@@ -5,6 +5,7 @@ import { App, DefaultStackSynthesizer } from "aws-cdk-lib";
 import { ServerlessImageHandlerStack } from "../lib/serverless-image-stack";
 import { CertificateStack } from "../lib/certificate-stack";
 import { HostedZoneStack } from "../lib/hosted-zone-stack";
+import { YesNo } from "../lib/types";
 
 // CDK and default deployment
 let synthesizer = new DefaultStackSynthesizer({
@@ -21,7 +22,7 @@ if (DIST_OUTPUT_BUCKET && SOLUTION_NAME && VERSION)
   });
 
 const app = new App();
-const customDomain: string | undefined = app.node.tryGetContext("customDomain");
+const customDomain: YesNo | undefined = app.node.tryGetContext("customDomain");
 const solutionDisplayName = "Serverless Image Handler";
 const region = AWS_REGION || CDK_DEFAULT_REGION;
 const description = `(${app.node.tryGetContext("solutionId")}) - ${solutionDisplayName}. Version ${
