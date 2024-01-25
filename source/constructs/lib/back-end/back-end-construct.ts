@@ -286,11 +286,7 @@ function handler(event) {
       (
         imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.node.defaultChild as CfnDistribution
       ).addPropertyOverride("DistributionConfig.Aliases", [props.customDomain]);
-    }
 
-    this.domainName = imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.distributionDomainName;
-
-    if (props.customDomain) {
       this.aRecord = new ARecord(this, "ARecord", {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         zone: props.hostedZone!,
@@ -301,18 +297,18 @@ function handler(event) {
       });
     }
 
+    this.domainName = imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.distributionDomainName;
+
     const originShieldEnabled = (this.node.tryGetContext("originShieldEnabled") as YesNo | undefined) === "Yes";
-    const originShieldRegion: string = this.node.tryGetContext("originShieldRegion");
+    const originShieldRegion: string = this.node.tryGetContext("originShieldRegion") || process.env.AWS_REGION;
 
     if (originShieldEnabled) {
-      let originShieldProps: CapitalizeInterface<OriginShieldProperty> = { Enabled: true };
-      if (originShieldRegion) {
-        originShieldProps = { ...originShieldProps, OriginShieldRegion: originShieldRegion };
-      }
-
       (
         imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.node.defaultChild as CfnDistribution
-      ).addPropertyOverride("DistributionConfig.Origins.0.OriginShield", originShieldProps);
+      ).addPropertyOverride("DistributionConfig.Origins.0.OriginShield", {
+        Enabled: true,
+        OriginShieldRegion: originShieldRegion,
+      } as CapitalizeInterface<OriginShieldProperty>);
     }
   }
 }
