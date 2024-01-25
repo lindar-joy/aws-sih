@@ -20,10 +20,10 @@ export interface SolutionConstructProps {
   readonly enableDefaultFallbackImage: YesNo;
   readonly fallbackImageS3Bucket: string;
   readonly fallbackImageS3KeyBucket: string;
-  readonly customDomain: string;
+  readonly customDomain?: string;
 }
 
-export type CertificateConstructProps = Pick<SolutionConstructProps, "customDomain">;
+export type CertificateConstructProps = Required<Pick<SolutionConstructProps, "customDomain">>;
 
 export interface CommonStackProps extends StackProps {
   readonly solutionId: string;
@@ -32,6 +32,6 @@ export interface CommonStackProps extends StackProps {
 }
 
 export interface ServerlessImageHandlerStackProps extends CommonStackProps {
-  readonly certificate: Certificate;
-  readonly hostedZone: HostedZone;
+  readonly certificate?: Certificate;
+  readonly hostedZone?: HostedZone;
 }

@@ -21,40 +21,54 @@ if (DIST_OUTPUT_BUCKET && SOLUTION_NAME && VERSION)
   });
 
 const app = new App();
+const customDomain: string | undefined = app.node.tryGetContext("customDomain");
 const solutionDisplayName = "Serverless Image Handler";
 const region = AWS_REGION || CDK_DEFAULT_REGION;
 const description = `(${app.node.tryGetContext("solutionId")}) - ${solutionDisplayName}. Version ${
   VERSION ?? app.node.tryGetContext("solutionVersion")
 }`;
 
-const hostedZoneStack = new HostedZoneStack(app, "HostedZoneStack", {
-  env: { region },
-  crossRegionReferences: true,
-  solutionId: app.node.tryGetContext("solutionId"),
-  solutionVersion: app.node.tryGetContext("solutionVersion"),
-  solutionName: app.node.tryGetContext("solutionName"),
-});
+let hostedZoneStack: HostedZoneStack;
+let certificateStack: CertificateStack;
 
-const certificateStack = new CertificateStack(app, "CertificateStack", {
-  env: {
-    region: "us-east-1",
-  },
-  hostedZone: hostedZoneStack.hostedZone,
-  crossRegionReferences: true,
-  solutionId: app.node.tryGetContext("solutionId"),
-  solutionVersion: app.node.tryGetContext("solutionVersion"),
-  solutionName: app.node.tryGetContext("solutionName"),
-});
-
-// eslint-disable-next-line no-new
-new ServerlessImageHandlerStack(app, "ServerlessImageHandlerStack", {
+const commonProps = {
   env: { region },
   synthesizer,
   description,
   solutionId: app.node.tryGetContext("solutionId"),
   solutionVersion: app.node.tryGetContext("solutionVersion"),
   solutionName: app.node.tryGetContext("solutionName"),
-  certificate: certificateStack.certificate,
-  hostedZone: hostedZoneStack.hostedZone,
-  crossRegionReferences: true,
-});
+};
+
+if (customDomain) {
+  hostedZoneStack = new HostedZoneStack(app, "HostedZoneStack", {
+    env: { region },
+    crossRegionReferences: true,
+    solutionId: app.node.tryGetContext("solutionId"),
+    solutionVersion: app.node.tryGetContext("solutionVersion"),
+    solutionName: app.node.tryGetContext("solutionName"),
+  });
+
+  certificateStack = new CertificateStack(app, "CertificateStack", {
+    env: {
+      // This is the only valid region https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_certificatemanager-readme.html#cross-region-certificates
+      region: "us-east-1",
+    },
+    hostedZone: hostedZoneStack.hostedZone,
+    crossRegionReferences: true,
+    solutionId: app.node.tryGetContext("solutionId"),
+    solutionVersion: app.node.tryGetContext("solutionVersion"),
+    solutionName: app.node.tryGetContext("solutionName"),
+  });
+
+  // eslint-disable-next-line no-new
+  new ServerlessImageHandlerStack(app, "ServerlessImageHandlerStack", {
+    ...commonProps,
+    certificate: certificateStack.certificate,
+    hostedZone: hostedZoneStack.hostedZone,
+    crossRegionReferences: true,
+  });
+}
+
+// eslint-disable-next-line no-new
+new ServerlessImageHandlerStack(app, "ServerlessImageHandlerStack", commonProps);

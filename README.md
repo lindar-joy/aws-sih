@@ -16,7 +16,10 @@
       - [Other examples](#other-examples)
     - [Query parameters](#query-parameters)
     - [Thumbor and Rewrites](#thumbor-and-rewrites)
-  - [Parameters reference](#parameters-reference)
+  - [Configuration reference](#configuration-reference)
+      - [Cloudformation](#cloudformation)
+      - [Context](#context)
+      - [Environment variables](#environment-variables)
   - [License](#license)
 
 # Changes in this fork
@@ -26,6 +29,7 @@
 - Disabled data collection
 - Upgraded dependencies
 - Scripts are only run from local dependencies (uses `npm run` instead of `npx`) for greater reliability
+- (Planned 🚧) Origin Shield support for improved cache hit ratio and performance
 
 ## Deploying or Customizing the Solution
 
@@ -76,10 +80,10 @@ overrideWarningsEnabled=false npm run cdk -- deploy\
 cd $MAIN_DIRECTORY/source/constructs
 npm run clean:install
 overrideWarningsEnabled=false npm run cdk -- bootstrap --profile <PROFILE_NAME>
-overrideWarningsEnabled=false npm run cdk -- deploy\
+overrideWarningsEnabled=false npm run cdk -- deploy --all\
  --parameters DeployDemoUIParameter=Yes\
   --parameters SourceBucketsParameter=<MY_BUCKET>\
-   --parameters CustomDomainParameter=<cdn.example.com,cdn2.example.com>\
+   --context customDomain<MY_DOMAIN>\
     --profile <PROFILE_NAME>
 ```
 
@@ -89,7 +93,7 @@ _Note:_
 
 - **MY_BUCKET**: name of an existing bucket or buckets in your account
 - **PROFILE_NAME**: name of an AWS CLI profile that has appropriate credentials for deploying in your preferred region
-- **MY_DOMAIN**: full domain to use as a Cloudfront alias, eg `--context CustomDomainParameter=x.example.com`
+- **MY_DOMAIN**: full domain to use as a Cloudfront alias, eg `--context customDomain=x.example.com`
 
 See all parameters: [Parameters reference](#parameters-reference)
 
@@ -101,10 +105,11 @@ For automated deployments with GitHub actions, see `.github/workflows/pipeline-w
 2. Bootstrap locally if not already done
 3. Change `if: github.repository_owner == 'GeKorm'` to your user or organization name
 4. Add the following variables and secrets:
-   - Secret **DISPATCHER_ROLE_ARN**
-   - Secret **SOURCE_BUCKETS** (for `SourceBucketsParameter`)
-   - Variable **DEMO_UI** (for `DeployDemoUIParameter`)
-   - _[Optional]_ Secret **CUSTOM_DOMAIN** (for `CustomDomainParameter`)
+   - Secret **DISPATCHER_ROLE_ARN** (for [`role-to-assume` in aws credentials action](https://github.com/aws-actions/configure-aws-credentials))
+   - Secret **SOURCE_BUCKETS** (for [`SourceBucketsParameter`](#cloudformation))
+   - _[Optional]_ Variable **DEMO_UI** (for [`DeployDemoUIParameter`](#cloudformation))
+   - _[Optional]_ Secret **CUSTOM_DOMAIN** (for [`customDomain`](#context))
+   - _[Optional]_ Secret **AWS_REGION** ([environment variable](#environment-variables))
 
 ## Usage
 
@@ -168,11 +173,13 @@ console.log("https://cdn.example.com/bucket/image.jpg?" + params.toString());
 
 Thumbor and the Rewrite feature may work, but are not supported. Please use the [original solution](https://github.com/aws-solutions/serverless-image-handler) if required.
 
-## Parameters reference
+## Configuration reference
 
 Required in **bold**
 
 ### Cloudformation
+
+#### `--parameters` flag
 
 These parameters can be added using the `--parameters` command line flag.
 
@@ -191,7 +198,25 @@ These parameters can be added using the `--parameters` command line flag.
 | <details><summary>FallbackImageS3BucketParameter</summary><h6>The name of the Amazon S3 bucket which contains the default fallback image. e.g. my-fallback-image-bucket</h6></details>                                                                                                                                                                 | String                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `­`                                        |
 | <details><summary>FallbackImageS3KeyParameter</summary><h6>The name of the default fallback image object key including prefix. e.g. prefix/image.jpg</h6></details>                                                                                                                                                                                    | String                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `­`                                        |
 | <details><summary>CloudFrontPriceClassParameter</summary><h6>The AWS CloudFront price class to use. For more information see: [Cloudfront documentation](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html)</h6></details>                                                                                            | <details><summary>String</summary><h6></h6><table role="table"><tbody><tr><td><code class="notranslate">PriceClass_All</code></td><td><code class="notranslate">PriceClass_200</code></td><td><code class="notranslate">PriceClass_100</code></td></tr></tbody></table></details>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `PriceClass_All`                           |
-| <details><summary>CustomDomainParameter</summary><h6>Alternative domain name for this distribution. For more information, see [Cloudfront documentation](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_cloudfront.Distribution.html#domainnames)</h6></details>                                                                          | String                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `­`                                        |
+
+### Context
+
+#### `source/constructs/cdk.json`
+
+These parameters can be added under `context` in `cdk.json`, or using the `--context` command line flag.
+
+| Name                                                                                                                                                                                                                                                                                                               | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Default |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |---------|
+| <details><summary>customDomain</summary><h6>Alternative domain name for this distribution. For more information, see [Cloudfront documentation](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_cloudfront.Distribution.html#domainnames)</h6></details>                                               | String                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `­`     |
+| <details><summary>**(WIP 🚧)** originShield</summary><h6>Enable Origin Shield to improve cache hit ratio and performance. For more information, see [Origin Shield documentation](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/origin-shield.html)</h6></details>                            | <details><summary>String</summary><h6></h6><table role="table"><tbody><tr><td><code class="notranslate">Yes</code></td><td><code class="notranslate">No</code></td></tr></tbody></table></details>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | `No`    |
+| <details><summary>**(WIP 🚧)** originShieldRegion</summary><h6>Specify if Origin Shield is not supported in your [AWS_REGION](#environment-variables). See [Origin Shield regions](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/origin-shield.html#choose-origin-shield-region)</h6></details> | String                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `­`    |
+
+
+### Environment variables
+| Name                                                                                                                                                                                                                   | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Default     |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |-------------|
+| <details><summary>AWS_REGION</summary><h6>Deploy the solution to this region. [Supported regions](https://docs.aws.amazon.com/solutions/latest/serverless-image-handler/supported-aws-regions.html)</h6></details> | String                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `us-east-1` |
+
 
 ## License
 

@@ -16,7 +16,7 @@ import {
   PriceClass,
   ViewerProtocolPolicy,
 } from "aws-cdk-lib/aws-cloudfront";
-import { ARecord, HostedZone, RecordTarget, CfnRecordSet } from "aws-cdk-lib/aws-route53";
+import { ARecord, HostedZone, RecordTarget } from "aws-cdk-lib/aws-route53";
 import { CloudFrontTarget } from "aws-cdk-lib/aws-route53-targets";
 import { HttpOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { Policy, PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
@@ -52,12 +52,13 @@ export interface BackEndProps extends SolutionConstructProps {
   readonly cloudFrontPriceClass: string;
   readonly certificate?: Certificate;
   readonly hostedZone?: HostedZone;
-  readonly customDomain: string;
+  readonly customDomain?: string;
   readonly conditions: Conditions;
 }
 
 export class BackEnd extends Construct {
   public domainName: string;
+  public aRecord?: ARecord;
 
   constructor(scope: Construct, id: string, props: BackEndProps) {
     super(scope, id);
@@ -192,7 +193,7 @@ export class BackEnd extends Construct {
         originRequestPolicy,
         cachePolicy,
       },
-      domainNames: [props.customDomain],
+      domainNames: props.customDomain ? [props.customDomain] : undefined,
       certificate: props.certificate,
       priceClass: props.cloudFrontPriceClass as PriceClass,
       enableLogging: true,
@@ -243,37 +244,32 @@ export class BackEnd extends Construct {
     ]);
 
     imageHandlerCloudFrontApiGatewayLambda.apiGateway.node.tryRemoveChild("Endpoint"); // we don't need the RestApi endpoint in the outputs
-    (
-      imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.node.defaultChild as CfnDistribution
-    ).addPropertyOverride("DistributionConfig.ViewerCertificate", {
-      "Fn::If": [
-        props.conditions.customDomainCondition.logicalId,
-        {
-          AcmCertificateArn: (props.certificate?.node.defaultChild as CfnCertificate).ref,
-          MinimumProtocolVersion: "TLSv1.2_2021",
-          SslSupportMethod: "sni-only",
-        },
-        Aws.NO_VALUE,
-      ],
-    });
 
-    (
-      imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.node.defaultChild as CfnDistribution
-    ).addPropertyOverride("DistributionConfig.Aliases", {
-      "Fn::If": [props.conditions.customDomainCondition.logicalId, [props.customDomain], Aws.NO_VALUE],
-    });
+    if (props.customDomain) {
+      (
+        imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.node.defaultChild as CfnDistribution
+      ).addPropertyOverride("DistributionConfig.ViewerCertificate", {
+        AcmCertificateArn: (props.certificate?.node.defaultChild as CfnCertificate).ref,
+        MinimumProtocolVersion: "TLSv1.2_2021",
+        SslSupportMethod: "sni-only",
+      });
+
+      (
+        imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.node.defaultChild as CfnDistribution
+      ).addPropertyOverride("DistributionConfig.Aliases", [props.customDomain]);
+    }
 
     this.domainName = imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution.distributionDomainName;
 
-    const aRecord = new ARecord(this, "ARecord", {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      zone: props.hostedZone!,
-      target: RecordTarget.fromAlias(
-        new CloudFrontTarget(imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution)
-      ),
-      recordName: props.customDomain,
-    });
-
-    (aRecord.node.defaultChild as CfnRecordSet).cfnOptions.condition = props.conditions.customDomainCondition;
+    if (props.customDomain) {
+      this.aRecord = new ARecord(this, "ARecord", {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        zone: props.hostedZone!,
+        target: RecordTarget.fromAlias(
+          new CloudFrontTarget(imageHandlerCloudFrontApiGatewayLambda.cloudFrontWebDistribution)
+        ),
+        recordName: props.customDomain,
+      });
+    }
   }
 }

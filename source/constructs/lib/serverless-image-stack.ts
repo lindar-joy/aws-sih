@@ -110,12 +110,7 @@ export class ServerlessImageHandlerStack extends Stack {
       default: "",
     });
 
-    const customDomainParameter = new CfnParameter(this, "CustomDomainParameter", {
-      type: "String",
-      description:
-        "Alternative domain name for this distribution. For more information, see https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_cloudfront.Distribution.html#domainnames",
-      default: "",
-    });
+    const customDomain: string | undefined = this.node.tryGetContext("customDomain");
 
     const fallbackImageS3KeyParameter = new CfnParameter(this, "FallbackImageS3KeyParameter", {
       type: "String",
@@ -157,7 +152,7 @@ export class ServerlessImageHandlerStack extends Stack {
       enableDefaultFallbackImage: enableDefaultFallbackImageParameter.valueAsString as YesNo,
       fallbackImageS3Bucket: fallbackImageS3BucketParameter.valueAsString,
       fallbackImageS3KeyBucket: fallbackImageS3KeyParameter.valueAsString,
-      customDomain: customDomainParameter.valueAsString,
+      customDomain,
     };
 
     const commonResources = new CommonResources(this, "CommonResources", {
@@ -239,10 +234,6 @@ export class ServerlessImageHandlerStack extends Stack {
             Parameters: [logRetentionPeriodParameter.logicalId],
           },
           {
-            Label: { default: "Custom Domain" },
-            Parameters: [customDomainParameter.logicalId],
-          },
-          {
             Label: {
               default:
                 "Image URL Signature (Note: Enabling signature is not compatible with previous image URLs, which could result in broken image links. Please refer to the implementation guide for details: https://docs.aws.amazon.com/solutions/latest/serverless-image-handler/considerations.html)",
@@ -285,9 +276,6 @@ export class ServerlessImageHandlerStack extends Stack {
           [secretsManagerKeyParameter.logicalId]: {
             default: "SecretsManager Key",
           },
-          [customDomainParameter.logicalId]: {
-            default: "Custom Domain",
-          },
           [enableDefaultFallbackImageParameter.logicalId]: {
             default: "Enable Default Fallback Image",
           },
@@ -309,11 +297,12 @@ export class ServerlessImageHandlerStack extends Stack {
       value: `https://${backEnd.domainName}`,
       description: "Link to API endpoint for sending image requests to.",
     });
-    new CfnOutput(this, "CustomDomain", {
-      value: customDomainParameter.valueAsString,
-      description: "The custom domain name for this distribution",
-      condition: commonResources.conditions.customDomainCondition,
-    });
+    if (customDomain) {
+      new CfnOutput(this, "CustomDomain", {
+        value: customDomain,
+        description: "The custom domain name for this distribution",
+      });
+    }
     new CfnOutput(this, "DemoUrl", {
       value: `https://${frontEnd.domainName}/index.html`,
       description: "Link to the demo user interface for the solution.",
