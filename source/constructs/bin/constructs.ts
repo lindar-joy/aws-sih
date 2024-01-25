@@ -69,7 +69,7 @@ if (customDomain) {
     hostedZone: hostedZoneStack.hostedZone,
     crossRegionReferences: true,
   });
+} else {
+  // eslint-disable-next-line no-new
+  new ServerlessImageHandlerStack(app, "ServerlessImageHandlerStack", commonProps);
 }
-
-// eslint-disable-next-line no-new
-new ServerlessImageHandlerStack(app, "ServerlessImageHandlerStack", commonProps);
