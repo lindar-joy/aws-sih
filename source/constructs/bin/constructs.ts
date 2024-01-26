@@ -43,7 +43,7 @@ const commonProps = {
 
 if (customDomain) {
   hostedZoneStack = new HostedZoneStack(app, "HostedZoneStack", {
-    env: { region },
+    env: { region: "us-east-1" },
     crossRegionReferences: true,
     solutionId: app.node.tryGetContext("solutionId"),
     solutionVersion: app.node.tryGetContext("solutionVersion"),

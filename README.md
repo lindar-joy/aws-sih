@@ -81,13 +81,13 @@ cd $MAIN_DIRECTORY/source/constructs
 npm run clean:install
 overrideWarningsEnabled=false npm run cdk -- bootstrap --profile <PROFILE_NAME>
 overrideWarningsEnabled=false npm run cdk -- deploy --all\
- --parameters DeployDemoUIParameter=Yes\
-  --parameters SourceBucketsParameter=<MY_BUCKET>\
+ --parameters ServerlessImageHandlerStack:DeployDemoUIParameter=Yes\
+  --parameters ServerlessImageHandlerStack:SourceBucketsParameter=<MY_BUCKET>\
    --context customDomain<MY_DOMAIN>\
     --profile <PROFILE_NAME>
 ```
 
-The first deployment with a custom domain requires verifying ownership, if not already verified. Until verified, the **deployment will seem stuck** at the `Certificate create_in_progress` step. Please see https://docs.aws.amazon.com/acm/latest/userguide/domain-ownership-validation.html for instructions. The solution will have created a Hosted zone for you custom domain, which you can view in the AWS Route 53 dashboard.
+The first deployment with a custom domain requires verifying ownership, if not already verified. Until verified, the **deployment will seem stuck** at the `Certificate create_in_progress` step. Please see `https://docs.aws.amazon.com/acm/latest/userguide/domain-ownership-validation.html` for instructions. The solution will have created a Hosted zone for you custom domain, which you can view in the AWS Route 53 dashboard.
 
 _Note:_
 
