@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.2.5] - 2024-01-12
+
+### Fixed
+
+- Ensure accurate image metadata when generating Amazon Rekognition compatible images [#374](https://github.com/aws-solutions/serverless-image-handler/issues/374)
+- Upgraded axios to v1.6.5 for vulnerability CVE-2023-26159
+- Exclude demo-ui-config from being deleted upon BucketDeployment update sync when updating to a new version
+
+### Changed
+
+- Overlay requests with an overlay image with one or both dimensions greater than the base image now returns a 400 bad request status with the message "Image to overlay must have same dimensions or smaller", previously returned a 500 internal error [#405](https://github.com/aws-solutions/serverless-image-handler/issues/405)
+- cdk update to 2.118.0
+- typescript update to 5.3.3
+- GIF files without multiple pages are now treated as non-animated, allowing all filters to be used on them [#460](https://github.com/aws-solutions/serverless-image-handler/issues/460)
+
+## [6.2.4] - 2023-12-06
+
+### Changed
+
+- node 20.x Lambda runtimes
+- cdk update to 2.111.0
+- disable gzip compression in cloudfront cache option to improve cache hit ratio [#373](https://github.com/aws-solutions/serverless-image-handler/pull/373)
+- requests for webp images supported for upper/lower case Accept header [#490](https://github.com/aws-solutions/serverless-image-handler/pull/490)
+- changed axios version to 1.6.2 for github dependabot reported vulnerability CVE-2023-45857
+- enabled thumbor filter chaining [#343](https://github.com/aws-solutions/serverless-image-handler/issues/343)
+
+## [6.2.3] - 2023-10-20
+
+### Fixed
+
+- Fixing Security Vulnerabilities
+
+### Changed
+
+- Updated the versions of multiple dependencies
+
+## [6.2.2] - 2023-09-29
+
+### Changed
+
+- Update package.json Author
+- Modify some license headers to maintain consistency
+
+### Security
+
+- Upgraded sharp to v0.32.6 for vulnerability CVE-2023-4863
+- Upgraded outdated NPM packages
+
 ## [6.2.1] - 2023-08-03
 
 ### Fixed
@@ -67,9 +115,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.0.0] - 2021-12-21
 
-### ⚠ BREAKING CHANGES
+### Changed
 
-Version 6.0.0 does not support upgrading from previous versions due to the update that uses the AWS CDK to generate the AWS CloudFormation template.
+- **Note that** Version 6.0.0 does not support upgrading from previous versions due to the update that uses the AWS CDK to generate the AWS CloudFormation template.
 
 ### Added
 
@@ -118,10 +166,6 @@ Version 6.0.0 does not support upgrading from previous versions due to the updat
 
 ## [5.1.0] - 2020-11-19
 
-### ⚠ BREAKING CHANGES
-
-- **Image URL Signature**: When image URL signature is enabled, all URLs including existing URLs should have `signature` query parameter.
-
 ### Added
 
 - Image URL signature: [#111](https://github.com/aws-solutions/serverless-image-handler/issues/111), [#203](https://github.com/aws-solutions/serverless-image-handler/issues/203), [#221](https://github.com/aws-solutions/serverless-image-handler/issues/221), [#227](https://github.com/aws-solutions/serverless-image-handler/pull/227)
@@ -147,6 +191,7 @@ Version 6.0.0 does not support upgrading from previous versions due to the updat
 - Migrate unit tests to use `jest`
 - Move all `aws-sdk` in `ImageHandler` Lambda function to `index.js` for the best practice
 - Enhance the default error message not to show empty JSON: [#206](https://github.com/aws-solutions/serverless-image-handler/issues/206)
+- **Image URL Signature**: When image URL signature is enabled, all URLs including existing URLs should have `signature` query parameter.
 
 ### Removed
 
@@ -182,7 +227,7 @@ Version 6.0.0 does not support upgrading from previous versions due to the updat
   - `thumbor-mapping.js`: `99.29%` to `100%`
   - `overall`: `91.55%` to `100%`
 
-## [4.2] - 2020-02-06
+## [4.2.0] - 2020-02-06
 
 ### Added
 
@@ -214,7 +259,7 @@ Version 6.0.0 does not support upgrading from previous versions due to the updat
 - Fix regular expression issue: [#114](https://github.com/aws-solutions/serverless-image-handler/issues/114), [#121](https://github.com/aws-solutions/serverless-image-handler/issues/121), [#125](https://github.com/aws-solutions/serverless-image-handler/issues/125)
 - Fix not working quality parameter: [#129](https://github.com/aws-solutions/serverless-image-handler/issues/129)
 
-## [4.1] - 2019-12-31
+## [4.1.0] - 2019-12-31
 
 ### Added
 
@@ -225,7 +270,7 @@ Version 6.0.0 does not support upgrading from previous versions due to the updat
 
 - Lambda functions runtime to nodejs12.x
 - sharp version (from 0.21.3 to 0.23.3)
-- Image handler function to use Composite API (https://sharp.pixelplumbing.com/en/stable/api-composite/)
+- Image handler function to use Composite API (<https://sharp.pixelplumbing.com/en/stable/api-composite/>)
 - License to Apache-2.0
 
 ### Removed

@@ -1,4 +1,5 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 
 import Rekognition from "aws-sdk/clients/rekognition";
 import S3 from "aws-sdk/clients/s3";
@@ -19,7 +20,7 @@ describe("crop", () => {
     );
     const image = sharp(originalImage, { failOnError: false }).withMetadata();
     const edits: ImageEdits = {
-      crop: { left: 0, right: 0, width: 100, height: 100 },
+      crop: { left: 0, top: 0, width: 100, height: 100 },
     };
 
     // Act

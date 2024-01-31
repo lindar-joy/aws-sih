@@ -123,7 +123,7 @@ export class CustomResourcesConstruct extends Construct {
 
     this.customResourceLambda = new NodejsFunction(this, "CustomResourceFunction", {
       description: `${props.solutionName} (${props.solutionVersion}): Custom resource`,
-      runtime: Runtime.NODEJS_18_X,
+      runtime: Runtime.NODEJS_20_X,
       timeout: Duration.minutes(1),
       memorySize: 128,
       role: this.customResourceRole,
@@ -184,6 +184,7 @@ export class CustomResourcesConstruct extends Construct {
     const bucketDeployment = new BucketDeployment(this, "DeployWebsite", {
       sources: [S3Source.asset(path.join(__dirname, "../../../../demo-ui"))],
       destinationBucket: props.hostingBucket,
+      exclude: ["demo-ui-config.js"],
     });
     Aspects.of(bucketDeployment).add(new ConditionAspect(this.conditions.deployUICondition));
   }

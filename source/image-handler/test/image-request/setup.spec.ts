@@ -146,7 +146,7 @@ describe("setup", () => {
 
   it("Should pass when a thumbor image request is provided and populate the ImageRequest object with the proper values", async () => {
     // Arrange
-    const event = { path: "/filters:grayscale()/test-image-001.jpg" };
+    const event = { path: "/thumbor/filters:grayscale()/test-image-001.jpg" };
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
     // Mock
@@ -180,7 +180,7 @@ describe("setup", () => {
   it("Should pass when a thumbor image request is provided and populate the ImageRequest object with the proper values", async () => {
     // Arrange
     const event = {
-      path: "/filters:format(png)/filters:quality(50)/test-image-001.jpg",
+      path: "/thumbor/filters:format(png)/filters:quality(50)/test-image-001.jpg",
     };
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
@@ -219,7 +219,7 @@ describe("setup", () => {
   it("Should pass when a custom image request is provided and populate the ImageRequest object with the proper values", async () => {
     // Arrange
     const event = {
-      path: "/filters-rotate(90)/filters-grayscale()/custom-image.jpg",
+      path: "/thumbor/filters-rotate(90)/filters-grayscale()/custom-image.jpg",
     };
     process.env = {
       SOURCE_BUCKETS: "allowedBucket001, allowedBucket002",
@@ -269,7 +269,7 @@ describe("setup", () => {
   it("Should pass when a custom image request is provided and populate the ImageRequest object with the proper values and no file extension", async () => {
     // Arrange
     const event = {
-      path: "/filters-rotate(90)/filters-grayscale()/custom-image",
+      path: "/thumbor/filters-rotate(90)/filters-grayscale()/custom-image",
     };
     process.env = {
       SOURCE_BUCKETS: "allowedBucket001, allowedBucket002",
@@ -604,7 +604,7 @@ describe("setup", () => {
     it("Should return JPG image when output is specified to JPG for the SVG image", async () => {
       // Arrange
       const event = {
-        path: "/filters:format(jpg)/image.svg",
+        path: "/thumbor/filters:format(jpg)/image.svg",
       };
 
       // Mock

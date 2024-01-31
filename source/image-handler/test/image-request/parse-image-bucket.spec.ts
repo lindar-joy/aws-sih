@@ -79,7 +79,7 @@ describe("parseImageBucket", () => {
 
   it("Should pass if there is at least one SOURCE_BUCKET specified that can be used as the default for Thumbor requests", () => {
     // Arrange
-    const event = { path: "/filters:grayscale()/test-image-001.jpg" };
+    const event = { path: "/thumbor/filters:grayscale()/test-image-001.jpg" };
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
     // Act
@@ -93,7 +93,7 @@ describe("parseImageBucket", () => {
 
   it("Should pass if there is at least one SOURCE_BUCKET specified that can be used as the default for Custom requests", () => {
     // Arrange
-    const event = { path: "/filters:grayscale()/test-image-001.jpg" };
+    const event = { path: "/thumbor/filters:grayscale()/test-image-001.jpg" };
 
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
@@ -108,7 +108,7 @@ describe("parseImageBucket", () => {
 
   it("Should pass if there is at least one SOURCE_BUCKET specified that can be used as the default for Custom requests", () => {
     // Arrange
-    const event = { path: "/filters:grayscale()/test-image-001.jpg" };
+    const event = { path: "/thumbor/filters:grayscale()/test-image-001.jpg" };
     process.env.SOURCE_BUCKETS = "allowedBucket001, allowedBucket002";
 
     // Act

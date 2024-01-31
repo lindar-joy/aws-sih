@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+import fs from "fs";
+
 import { mockAwsS3 } from "./mock";
 
 import { handler } from "../index";
@@ -424,6 +426,58 @@ describe("index", () => {
       Bucket: "source-bucket",
       Key: "test.jpg",
     });
+    expect(result).toEqual(expectedResult);
+  });
+
+  it("should return an error JSON with the expected message when one or both overlay image dimensions are greater than the base image dimensions", async () => {
+    // Arrange
+    // {"bucket":"source-bucket","key":"transparent-10x10.png","edits":{"overlayWith":{"bucket":"source-bucket","key":"transparent-5x5.png"}},"headers":{"Custom-Header":"Custom header test","Cache-Control":"max-age:1,public"}}
+    const event: ImageHandlerEvent = {
+      path: "source-bucket/transparent-10x10.png",
+      queryStringParameters: {
+        edits: JSON.stringify({
+          overlayWith: {
+            bucket: "source-bucket",
+            key: "transparent-5x5.png",
+          },
+        }),
+        headers: JSON.stringify({
+          "Custom-Header": "Custom header test",
+          "Cache-Control": "max-age:1,public",
+        }),
+      },
+    };
+    // Mock
+    const overlayImage = fs.readFileSync("./test/image/transparent-5x5.jpeg");
+    const baseImage = fs.readFileSync("./test/image/transparent-10x10.jpeg");
+
+    // Mock
+    mockAwsS3.getObject.mockImplementation((data) => ({
+      promise() {
+        return Promise.resolve({
+          Body: data.Key === "transparent-10x10.png" ? overlayImage : baseImage,
+        });
+      },
+    }));
+
+    // Act
+    const result = await handler(event);
+    const expectedResult = {
+      statusCode: StatusCodes.BAD_REQUEST,
+      isBase64Encoded: false,
+      headers: {
+        "Access-Control-Allow-Methods": "GET",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Credentials": true,
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: `Image to overlay must have same dimensions or smaller`,
+        code: "BadRequest",
+        status: StatusCodes.BAD_REQUEST,
+      }),
+    };
     expect(result).toEqual(expectedResult);
   });
 });
