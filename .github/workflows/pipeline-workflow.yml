@@ -48,8 +48,8 @@ jobs:
       - name: Deploy without domain
         working-directory: ./source/constructs
         if: ${{ env.CUSTOM_DOMAIN == '' }}
-        run: overrideWarningsEnabled=false npm run cdk -- deploy --parameters DeployDemoUIParameter=$DEMO_UI --parameters SourceBucketsParameter=$SOURCE_BUCKETS
+        run: overrideWarningsEnabled=false npm run cdk -- deploy --parameters DeployDemoUIParameter=$DEMO_UI --parameters SourceBucketsParameter=$SOURCE_BUCKETS --parameters AutoWebPParameter=Yes
       - name: Deploy with custom domain
         working-directory: ./source/constructs
         if: ${{ env.CUSTOM_DOMAIN != '' }}
-        run: overrideWarningsEnabled=false npm run cdk -- deploy --parameters ServerlessImageHandlerStack:DeployDemoUIParameter=$DEMO_UI --context customDomain=$CUSTOM_DOMAIN --parameters ServerlessImageHandlerStack:SourceBucketsParameter=$SOURCE_BUCKETS --all
+        run: overrideWarningsEnabled=false npm run cdk -- deploy --parameters ServerlessImageHandlerStack:DeployDemoUIParameter=$DEMO_UI --context customDomain=$CUSTOM_DOMAIN --parameters ServerlessImageHandlerStack:SourceBucketsParameter=$SOURCE_BUCKETS --parameters AutoWebPParameter=Yes --all
