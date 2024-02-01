@@ -13,12 +13,8 @@ export class HostedZoneStack extends Stack {
   constructor(scope: Construct, id: string, props: CommonStackProps) {
     super(scope, id, props);
 
-    const customDomain: YesNo = this.node.tryGetContext("customDomain");
+    const domain: YesNo = this.node.tryGetContext("customDomain");
 
-    const certificateConstructProps = { customDomain };
-
-    this.hostedZone = new HostedZoneResources(this, "HostedZone", {
-      domain: certificateConstructProps.customDomain,
-    }).hostedZone;
+    this.hostedZone = new HostedZoneResources(this, "HostedZone", { domain }).hostedZone;
   }
 }
