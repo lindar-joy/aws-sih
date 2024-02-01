@@ -16,10 +16,8 @@ export class CertificateStack extends Stack {
 
     const customDomain: YesNo = this.node.tryGetContext("customDomain");
 
-    const certificateConstructProps = { customDomain };
-
     this.certificate = new CertificateResources(this, "Certificate", {
-      domain: certificateConstructProps.customDomain,
+      domain: customDomain,
       hostedZone: props.hostedZone,
     }).customCertificate;
   }

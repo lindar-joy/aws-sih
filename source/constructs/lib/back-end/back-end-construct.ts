@@ -13,6 +13,7 @@ import {
   Function,
   FunctionCode,
   FunctionEventType,
+  FunctionRuntime,
   IOrigin,
   OriginRequestPolicy,
   OriginSslPolicy,
@@ -191,6 +192,7 @@ export class BackEnd extends Construct {
     // Inspired by https://github.com/aws-solutions/serverless-image-handler/issues/304#issuecomment-1172255508
     // Add a cloudfront Function to normalize the accept header
     const normalizeAcceptHeaderFunction = new Function(this, "NormalizeAcceptHeaderFunction", {
+      runtime: FunctionRuntime.JS_2_0,
       functionName: `normalize-accept-headers-${Aws.REGION}`,
       code: FunctionCode.fromInline(`
 function handler(event) {
