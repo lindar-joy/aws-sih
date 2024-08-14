@@ -210,6 +210,21 @@ describe("parseImageKey", () => {
     expect(result).toEqual(expectedResult);
   });
 
+  it("Should handle non-URL-safe paths and filenames", () => {
+    // Arrange
+    const event = {
+      path: "/test/vacation/beach-100x100%20(1)%20__%D8%B3%D9%84%D9%8A%D9%85%20%D9%84%D9%8A%D9%81%D8%AA%20(2).jpg",
+    };
+
+    // Act
+    const imageRequest = new ImageRequest(s3Client, secretProvider);
+    const result = imageRequest.parseImageKey(event, RequestTypes.DEFAULT);
+
+    // Assert
+    const expectedResult = "vacation/beach-100x100 (1) __سليم ليفت (2).jpg";
+    expect(result).toEqual(expectedResult);
+  });
+
   it("Should pass if an image key value is provided in the custom request format", () => {
     // Arrange
     const event = {

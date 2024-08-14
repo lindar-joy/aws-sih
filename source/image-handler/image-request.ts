@@ -390,7 +390,7 @@ export class ImageRequest {
 
       const result: DefaultImageRequest = {
         bucket,
-        key,
+        key: decodeURIComponent(key),
       };
 
       if (queryStringParameters) {

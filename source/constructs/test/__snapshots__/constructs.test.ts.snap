@@ -1279,7 +1279,7 @@ function handler(event) {
               ],
             ],
           },
-          "Runtime": "cloudfront-js-1.0",
+          "Runtime": "cloudfront-js-2.0",
         },
         "Name": {
           "Fn::Join": [
@@ -3585,7 +3585,7 @@ function handler(event) {
               ],
             ],
           },
-          "Runtime": "cloudfront-js-1.0",
+          "Runtime": "cloudfront-js-2.0",
         },
         "Name": {
           "Fn::Join": [
@@ -5914,7 +5914,7 @@ function handler(event) {
               ],
             ],
           },
-          "Runtime": "cloudfront-js-1.0",
+          "Runtime": "cloudfront-js-2.0",
         },
         "Name": {
           "Fn::Join": [
@@ -8337,7 +8337,7 @@ function handler(event) {
               ],
             ],
           },
-          "Runtime": "cloudfront-js-1.0",
+          "Runtime": "cloudfront-js-2.0",
         },
         "Name": {
           "Fn::Join": [
