@@ -58,7 +58,7 @@ describe("parseRequestType", () => {
   it("Should pass for a thumbor request with no extension", () => {
     // Arrange
     const event = {
-      path: "/unsafe/filters:brightness(10):contrast(30)/image",
+      path: "/thumbor/unsafe/filters:brightness(10):contrast(30)/image",
     };
     process.env = {};
 
@@ -67,8 +67,7 @@ describe("parseRequestType", () => {
     const result = imageRequest.parseRequestType(event);
 
     // Assert
-    expect(consoleInfoSpy).toHaveBeenCalledWith("Path is not base64 encoded.");
-    expect(result).toEqual(RequestTypes.DEFAULT);
+    expect(result).toEqual(RequestTypes.THUMBOR);
   });
 
   test.each([
@@ -86,7 +85,7 @@ describe("parseRequestType", () => {
 
     // Act
     const imageRequest = new ImageRequest(s3Client, secretProvider);
-    const result = imageRequest.parseRequestType({ path: `image${value}` });
+    const result = imageRequest.parseRequestType({ path: `/thumbor/image${value}` });
 
     // Assert
     expect(result).toEqual(RequestTypes.THUMBOR);
@@ -111,7 +110,7 @@ describe("parseRequestType", () => {
 
   it("Should throw an error if the method cannot determine the request type based on the three groups given", () => {
     // Arrange
-    const event = { path: "12x12e24d234r2ewxsad123d34r.bmp" };
+    const event = { path: "/thumbor/12x12e24d234r2ewxsad123d34r.bmp" };
 
     process.env = {};
 
@@ -136,7 +135,7 @@ describe("parseRequestType", () => {
   it("Should throw an error for a thumbor request with invalid extension", () => {
     // Arrange
     const event = {
-      path: "/testImage.abc",
+      path: "/thumbor/testImage.abc",
     };
     process.env = {};
 

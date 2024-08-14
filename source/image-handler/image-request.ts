@@ -32,7 +32,10 @@ type OriginalImageInfo = Partial<{
 export class ImageRequest {
   private static readonly DEFAULT_EFFORT = 4;
 
-  constructor(private readonly s3Client: S3, private readonly secretProvider: SecretProvider) {}
+  constructor(
+    private readonly s3Client: S3,
+    private readonly secretProvider: SecretProvider
+  ) {}
 
   /**
    * Determines the output format of an image
@@ -106,8 +109,6 @@ export class ImageRequest {
       imageRequestInfo.bucket = this.parseImageBucket(event, imageRequestInfo.requestType);
       imageRequestInfo.key = this.parseImageKey(event, imageRequestInfo.requestType, imageRequestInfo.bucket);
       imageRequestInfo.edits = this.parseImageEdits(event, imageRequestInfo.requestType);
-      console.log("setup imageRequestInfo.edits");
-      console.log(imageRequestInfo.edits);
 
       const originalImage = await this.getOriginalImage(imageRequestInfo.bucket, imageRequestInfo.key);
       imageRequestInfo = { ...imageRequestInfo, ...originalImage };
@@ -371,9 +372,6 @@ export class ImageRequest {
     } else if (matchThumbor1.test(path) && (matchThumbor2.test(path) || matchThumbor3.test(path))) {
       // use thumbor
       return RequestTypes.THUMBOR;
-    } else if (s3UrlPattern.test(path)) {
-      // use sharp
-      return RequestTypes.DEFAULT;
     } else {
       throw new ImageHandlerError(
         StatusCodes.BAD_REQUEST,
