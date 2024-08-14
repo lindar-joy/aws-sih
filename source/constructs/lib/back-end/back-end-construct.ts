@@ -50,11 +50,13 @@ const queryStringParameters: (keyof QueryStringParameters)[] = [
 
 export interface BackEndProps extends SolutionConstructProps {
   readonly solutionVersion: string;
+  readonly solutionId: string;
   readonly solutionName: string;
   readonly secretsManagerPolicy: Policy;
   readonly logsBucket: IBucket;
   readonly uuid: string;
   readonly cloudFrontPriceClass: string;
+  readonly createSourceBucketsResource: (key?: string) => string[];
   readonly certificate?: Certificate;
   readonly hostedZone?: HostedZone;
   readonly customDomain?: string;
@@ -88,15 +90,16 @@ export class BackEnd extends Construct {
           ],
         }),
         new PolicyStatement({
-          actions: ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
-          resources: [
-            Stack.of(this).formatArn({
-              service: "s3",
-              resource: "*",
-              region: "",
-              account: "",
-            }),
-          ],
+          actions: ["s3:GetObject"],
+          resources: props.createSourceBucketsResource("/*"),
+        }),
+        new PolicyStatement({
+          actions: ["s3:ListBucket"],
+          resources: props.createSourceBucketsResource(),
+        }),
+        new PolicyStatement({
+          actions: ["s3:GetObject"],
+          resources: [`arn:aws:s3:::${props.fallbackImageS3Bucket}/${props.fallbackImageS3KeyBucket}`],
         }),
         new PolicyStatement({
           actions: ["rekognition:DetectFaces", "rekognition:DetectModerationLabels"],
@@ -130,6 +133,8 @@ export class BackEnd extends Construct {
         ENABLE_DEFAULT_FALLBACK_IMAGE: props.enableDefaultFallbackImage,
         DEFAULT_FALLBACK_IMAGE_BUCKET: props.fallbackImageS3Bucket,
         DEFAULT_FALLBACK_IMAGE_KEY: props.fallbackImageS3KeyBucket,
+        SOLUTION_VERSION: props.solutionVersion,
+        SOLUTION_ID: props.solutionId,
       },
       bundling: {
         externalModules: ["sharp"],

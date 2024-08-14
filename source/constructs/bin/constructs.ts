@@ -25,9 +25,8 @@ const app = new App();
 const customDomain: YesNo | undefined = app.node.tryGetContext("customDomain");
 const solutionDisplayName = "Serverless Image Handler";
 const region = AWS_REGION || CDK_DEFAULT_REGION;
-const description = `(${app.node.tryGetContext("solutionId")}) - ${solutionDisplayName}. Version ${
-  VERSION ?? app.node.tryGetContext("solutionVersion")
-}`;
+const solutionVersion = VERSION ?? app.node.tryGetContext("solutionVersion");
+const description = `(${app.node.tryGetContext("solutionId")}) - ${solutionDisplayName}. Version ${solutionVersion}`;
 
 let hostedZoneStack: HostedZoneStack;
 let certificateStack: CertificateStack;
@@ -37,7 +36,7 @@ const commonProps = {
   synthesizer,
   description,
   solutionId: app.node.tryGetContext("solutionId"),
-  solutionVersion: app.node.tryGetContext("solutionVersion"),
+  solutionVersion,
   solutionName: app.node.tryGetContext("solutionName"),
 };
 
