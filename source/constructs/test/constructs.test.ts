@@ -161,6 +161,7 @@ test("Serverless Image Handler Stack Snapshot with Origin Shield", () => {
   const app = new App({
     context: {
       originShieldEnabled: "Yes",
+      originShieldRegion: "us-east-1",
     },
   });
 

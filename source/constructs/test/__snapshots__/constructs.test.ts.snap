@@ -3092,6 +3092,7 @@ exports[`Serverless Image Handler Stack Snapshot with Origin Shield 1`] = `
               "OriginPath": "/image",
               "OriginShield": {
                 "Enabled": true,
+                "OriginShieldRegion": "us-east-1",
               },
             },
           ],
