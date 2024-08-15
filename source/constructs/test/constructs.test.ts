@@ -161,13 +161,14 @@ test("Serverless Image Handler Stack Snapshot with Origin Shield", () => {
   const app = new App({
     context: {
       originShieldEnabled: "Yes",
+      originShieldRegion: "us-east-1",
     },
   });
 
   const stack = new ServerlessImageHandlerStack(app, "TestStack4", {
     solutionId: "S0ABC",
     solutionName: "sih",
-    solutionVersion: "v6.2.5",
+    solutionVersion: "v6.2.6",
   });
 
   const template = Template.fromStack(stack);
@@ -184,6 +185,11 @@ test("Serverless Image Handler Stack Snapshot with Origin Shield", () => {
     }
     if (templateJson.Resources[key].Properties?.Content?.S3Key) {
       templateJson.Resources[key].Properties.Content.S3Key = "Omitted to remove snapshot dependency on hash";
+    }
+    if (templateJson.Resources[key].Properties?.SourceObjectKeys) {
+      templateJson.Resources[key].Properties.SourceObjectKeys = [
+        "Omitted to remove snapshot dependency on demo ui module hash",
+      ];
     }
   });
 

@@ -30,6 +30,7 @@
 - Origin Shield support for improved cache hit ratio and performance
 - Disabled data collection
 - Upgraded dependencies
+- Improved cross-region support
 - Scripts are only run from local dependencies (uses `npm run` instead of `npx`) for greater reliability
 
 ## Deploying or Customizing the Solution
