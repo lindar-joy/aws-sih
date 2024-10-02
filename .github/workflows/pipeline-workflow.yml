@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Test scenario input'
+        default: 'Test'
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}
